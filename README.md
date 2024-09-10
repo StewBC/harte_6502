@@ -74,7 +74,7 @@ All 1518 tests that it fails are in `adc`, in `BCD` mode, where my emulator diff
 # Why and what's next?  
 I did this just because I was curious and wanted to try making a 6502 emulator.  I might try to write a portion of a system emulator, likely for the Commodore 64, that can run some basic programs without graphics, sound or sprites.  A minimal C64 emulator.<sup>*</sup>
   
-<sup>*</sup>Well, I made a very small Apple II emulator that can run the Manic Miner I made for the Apple II and it works great (this 6502).  The Speaker on the emulation is horrible but it works pretty well, so I can confirm this CPU emulation works well enough in a real application.  You can see more about that here: [Manic Miner Machine](https://github.com/StewBC/mminer-apple2/blob/master/src/mmm/README.md)  
+<sup>*</sup>I made a very small Apple II emulator that can run the Manic Miner I made for the Apple II.  I call it the Manic Miner Machine, and it works.  I used this 6502 code as-is.  The Speaker audio on the Manic Miner Machine emulator is horrible but otherwise it works great, so I can confirm this CPU emulation works well enough in a real application.  You can see more about that here: [Manic Miner Machine](https://github.com/StewBC/mminer-apple2/blob/master/src/mmm/README.md)  
   
 Feel free to contact me at swessels@email.com if you have thoughts or suggestions.  
 
