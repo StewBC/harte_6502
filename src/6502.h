@@ -11,7 +11,7 @@ struct MEMORY_REGION {
     uint8_t  *memory;
 };
 
-/* RAM_BANK is */
+/* RAM contains an array of MEMORY_REGIONS which may (or not) be mapped into the 6502's 64K*/
 typedef struct MEMORY_REGION RAM_BANK;
 struct RAM {
     RAM_BANK *ram_banks;
@@ -76,16 +76,16 @@ struct CPU {
         uint8_t page_fault: 1;  // During stages where a page-fault could happen, denotes fault
     };
     uint8_t instruction;        // Current instruction being executed
-    int16_t instruction_cycle;  // Stage (value 0, instruction fetced, is cycle 1 of execution, -1 need instruction)
-    uint64_t cycles;            // Totsl count of cycles the cpu has executed
+    int16_t instruction_cycle;  // Stage (value 0, instruction fetched, is cycle 1 of execution, -1 need instruction)
+    uint64_t cycles;            // Total count of cycles the cpu has executed
 } ;
 typedef struct CPU CPU;
 
-// Forward declerations
+// Forward declarations
 struct MACHINE;
 typedef struct MACHINE MACHINE;
 
-// Function pointer prototype that point at the steps, each indivisual cycle, of a 6502 instruction
+// Function pointer prototype that point at the steps, each individual cycle, of a 6502 instruction
 typedef void (*opcode_steps)(MACHINE *m);
 
 // Prototypes for callbacks when cpu accesses a port
