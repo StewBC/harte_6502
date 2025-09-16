@@ -246,6 +246,8 @@ void io_write_callback(MACHINE *m, uint16_t address, uint8_t value) {
 int configure_Harte(MACHINE *m) {
     uint8_t *file_data;
 
+    opcodes = opcodes_65c02;
+
     // RAM
     if(!ram_init(&m->ram, 1)) {
         return RESULT_PREP_ERROR;

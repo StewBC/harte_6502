@@ -38,187 +38,164 @@ void    sl_read_ypf_a16(MACHINE *m);
 void    sl_read_x_a16(MACHINE *m);
 void    sl_write_a16(MACHINE *m);
 
-// 6502 Instructions
-void    adc_a16(MACHINE *m);    /* 65 */
-// void adc_a16_x(MACHINE *m);  /* 75 */ same as adc_a16
-// void adc_abs(MACHINE *m);    /* 6D */ same as adc_a16
-void    adc_abs_x(MACHINE *m);  /* 7D */
-void    adc_abs_y(MACHINE *m);  /* 79 */
-void    adc_imm(MACHINE *m);    /* 69 */
-// void adc_ind_x(MACHINE *m);  /* 61 */ same as adc_a16
-//void adc_ind_y(MACHINE *m);   /* 71 */ same as adc_abs_y
-
-void    and_imm(MACHINE *m);    /* 29 */
-void    and_a16(MACHINE *m);    /* 25 */
-// void and_a16_x(MACHINE *m);  /* 35 */ same as and_a16
-void    and_abs(MACHINE *m);    /* 2D */
-void    and_abs_x(MACHINE *m);  /* 3D */
-void    and_abs_y(MACHINE *m);  /* 39 */
-void    and_ind_x(MACHINE *m);  /* 21 */
-// void and_ind_y(MACHINE *m);  /* 31 */ same as and_abs_y
-
-void    asl_a(MACHINE *m);      /* 0A */
-void    asl_a16(MACHINE *m);    /* 06 */
-// void asl_a16_x(MACHINE *m);  /* 16 */ same as asl_a16
-// void asl_abs(MACHINE *m);    /* 0E */ same as asl_a16
-// void asl_abs_x(MACHINE *m);  /* 1E */ same as asl_a16
-
-void    bcc(MACHINE *m);        /* 90 */
-void    bcs(MACHINE *m);        /* B0 */
-void    beq(MACHINE *m);        /* F0 */
-void    bit_a16(MACHINE *m);    /* 24 */
-// void bit_abs(MACHINE *m);    /* 2C */ same as bit_a16
-void    bmi(MACHINE *m);        /* 30 */
-void    bne(MACHINE *m);        /* D0 */
-void    bpl(MACHINE *m);        /* 10 */
-void    brk(MACHINE *m);        /* 00 */
-void    bvc(MACHINE *m);        /* 50 */
-void    bvs(MACHINE *m);        /* 70 */
-
-void    clc(MACHINE *m);        /* 18 */
-void    cld(MACHINE *m);        /* D8 */
-void    cli(MACHINE *m);        /* 58 */
-void    clv(MACHINE *m);        /* B8 */
-
-void    cmp_imm(MACHINE *m);    /* C9 */
-void    cmp_a16(MACHINE *m);    /* C5 */
-// void cmp_a16_x(MACHINE *m);  /* D5 */ same as cmp_a16
-// void cmp_abs(MACHINE *m);    /* CD */ same as cmp_a16
-void    cmp_abs_x(MACHINE *m);  /* DD */
-void    cmp_abs_y(MACHINE *m);  /* D9 */
-// void cmp_ind_x(MACHINE *m);  /* C1 */ same as cmp_a16
-// void cmp_ind_y(MACHINE *m);  /* D1 */ same as cmp_abs_y
-
-void    cpx_imm(MACHINE *m);    /* E0 */
-void    cpx_a16(MACHINE *m);    /* E4 */
-// void cpx_abs(MACHINE *m);    /* EC */ same as cpx_a16
-
-void    cpy_imm(MACHINE *m);    /* C0 */
-void    cpy_a16(MACHINE *m);    /* C4 */
-// void cpy_abs(MACHINE *m);    /* CC */ same as cpy_a16
-
-void    dec_a16(MACHINE *m);    /* C6 */
-// void dec_a16_x(MACHINE *m);  /* D6 */ same as dec_a16
-// void dec_abs(MACHINE *m);    /* CE */ same as dec_a16
-// void dec_abs_x(MACHINE *m);  /* DE */ same as dec_a16
-
-void    dex(MACHINE *m);        /* CA */
-void    dey(MACHINE *m);        /* 88 */
-
-void    eor_imm(MACHINE *m);    /* 49 */
-void    eor_a16(MACHINE *m);    /* 45 */
-// void eor_a16_x(MACHINE *m);  /* 55 */ same as eor_a16
-// void eor_abs(MACHINE *m);    /* 4D */ same as eor_a16
-void    eor_abs_x(MACHINE *m);  /* 5D */
-void    eor_abs_y(MACHINE *m);  /* 59 */
-// void eor_ind_x(MACHINE *m);  /* 41 */ same as eor_a16
-// void eor_ind_y(MACHINE *m);  /* 51 */ same as eor_abs_y
-
-void    inc_a16(MACHINE *m);    /* E6 */
-// void inc_a16_x(MACHINE *m);  /* F6 */ same as inc_a16
-// void inc_abs(MACHINE *m);    /* EE */ same as inc_a16
-// void inc_abs_x(MACHINE *m);  /* FE */ same as inc_a16
-
-void    inx(MACHINE *m);        /* E8 */
-void    iny(MACHINE *m);        /* C8 */
-
-void    jmp_abs(MACHINE *m);    /* 4C */
-void    jmp_ind(MACHINE *m);    /* 6C */
-void    jsr_abs(MACHINE *m);    /* 20 */
-
-void    lda_imm(MACHINE *m);    /* A9 */
-void    lda_a16(MACHINE *m);    /* A5 */
-// void lda_a16_x(MACHINE *m);  /* B5 */ same as lda_a16
-// void lda_abs(MACHINE *m);    /* AD */ same as lda_a16
-void    lda_abs_x(MACHINE *m);  /* BD */
-void    lda_abs_y(MACHINE *m);  /* B9 */
-// void lda_ind_x(MACHINE *m);  /* A1 */ same as lda_a16
-// void lda_ind_y(MACHINE *m);  /* B1 */ same as lda_abs_y
-
-void    ldx_imm(MACHINE *m);    /* A2 */
-void    ldx_a16(MACHINE *m);    /* A6 */
-// void ldx_a16_y(MACHINE *m);  /* B6 */ same as ldx_a16
-// void ldx_abs(MACHINE *m);    /* AE */ same as ldx_a16
-void    ldx_abs_y(MACHINE *m);  /* BE */
-
-void    ldy_imm(MACHINE *m);    /* A0 */
-void    ldy_a16(MACHINE *m);    /* A4 */
-// void ldy_a16_x(MACHINE *m);  /* B4 */ same as ldy_a16
-// void ldy_abs(MACHINE *m);    /* AC */ same as ldy_a16
-void    ldy_abs_x(MACHINE *m);  /* BC */
-
-void    lsr_a(MACHINE *m);      /* 4A */
-void    lsr_a16(MACHINE *m);    /* 46 */
-// void lsr_a16_x(MACHINE *m);  /* 56 */ same as lsr_a16
-// void lsr_abs(MACHINE *m);    /* 4E */ same as lsr_a16
-// void lsr_abs_x(MACHINE *m);  /* 5E */ same as lsr_a16
-
-void    nop(MACHINE *m);        /* EA */
-
-void    ora_imm(MACHINE *m);    /* 09 */
-void    ora_a16(MACHINE *m);    /* 05 */
-// void ora_a16_x(MACHINE *m);  /* 15 */ same as ora_a16
-// void ora_abs(MACHINE *m);    /* 0D */ same as ora_a16
-void    ora_abs_x(MACHINE *m);  /* 1D */
-void    ora_abs_y(MACHINE *m);  /* 19 */
-// void ora_ind_x(MACHINE *m);  /* 01 */ same as ora_a16
-// void ora_ind_y(MACHINE *m);  /* 11 */ same as ora_abs_y
-
-void    pha(MACHINE *m);        /* 48 */
-void    php(MACHINE *m);        /* 08 */
-void    pla(MACHINE *m);        /* 68 */
-void    plp(MACHINE *m);        /* 28 */
-
-void    rol_a(MACHINE *m);      /* 2A */
-void    rol_a16(MACHINE *m);    /* 26 */
-// void rol_a16_x(MACHINE *m);  /* 36 */ same as rol_a16
-// void rol_abs(MACHINE *m);    /* 2E */ same as rol_a16
-// void rol_abs_x(MACHINE *m);  /* 3E */ same as rol_a16
-
-void    ror_a(MACHINE *m);      /* 6A */
-void    ror_a16(MACHINE *m);    /* 66 */
-// void ror_a16_x(MACHINE *m);  /* 76 */ same as ror_a16
-// void ror_abs(MACHINE *m);    /* 6E */ same as ror_a16
-// void ror_abs_x(MACHINE *m);  /* 7E */ same as ror_a16
-
-void    rti(MACHINE *m);        /* 40 */
-void    rts(MACHINE *m);        /* 60 */
-
-void    sbc_imm(MACHINE *m);    /* E9 */
-void    sbc_a16(MACHINE *m);    /* E5 */
-// void sbc_a16_x(MACHINE *m);  /* F5 */ same as sbc_a16
-// void sbc_abs(MACHINE *m);    /* ED */ same as sbc_a16
-void    sbc_abs_x(MACHINE *m);  /* FD */
-void    sbc_abs_y(MACHINE *m);  /* F9 */
-// void sbc_ind_x(MACHINE *m);  /* E1 */ same as sbc_a16
-// void sbc_ind_y(MACHINE *m);  /* F1 */ same as sbc_abs_y
-
-void    sec(MACHINE *m);        /* 38 */
-void    sed(MACHINE *m);        /* F8 */
-void    sei(MACHINE *m);        /* 78 */
-
-void    sta_a16(MACHINE *m);    /* 85 */
-// void sta_a16_x(MACHINE *m);  /* 95 */ same as sta_a16
-// void sta_abs(MACHINE *m);    /* 8D */ same as sta_a16
-void    sta_abs_x(MACHINE *m);  /* 9D */
-void    sta_abs_y(MACHINE *m);  /* 99 */
-// void sta_ind_x(MACHINE *m);  /* 81 */ same as sta_a16
-// void sta_ind_y(MACHINE *m);  /* 91 */ same as sta_abs_y
-
-void    stx_a16(MACHINE *m);    /* 86 */
-// void stx_a16_y(MACHINE *m);  /* 96 */ same as stx_a16
-// void stx_abs(MACHINE *m);    /* 8E */ same as stx_a16
-
-void    sty_a16(MACHINE *m);    /* 84 */
-// void sty_a16_x(MACHINE *m);  /* 94 */ same as sty_a16
-// void sty_abs(MACHINE *m);    /* 8C */ same as sty_a16
-
-void    tax(MACHINE *m);        /* AA */
-void    tay(MACHINE *m);        /* A8 */
-void    tsx(MACHINE *m);        /* BA */
-void    txa(MACHINE *m);        /* 8A */
-void    txs(MACHINE *m);        /* 9A */
-void    tya(MACHINE *m);        /* 98 */
+// 6502 Instructions (all types)
+void a2brk(MACHINE * m);         /* 00 */                      // brk conflicts on Linux
+// void ora_ind_x(MACHINE *m)    /* 01 */ same as ora_a16
+void tsb(MACHINE * m);           /* 04 */
+void ora_a16(MACHINE * m);       /* 05 */
+void asl_a16(MACHINE * m);       /* 06 */
+void php(MACHINE * m);           /* 08 */
+void ora_imm(MACHINE * m);       /* 09 */
+void asl_a(MACHINE * m);         /* 0A */
+// void tsb_abs(MACHINE * m);    /* 0C */ same as tsb
+// void ora_abs(MACHINE *m)      /* 0D */ same as ora_a16
+// void asl_abs(MACHINE *m)      /* 0E */ same as asl_a16
+void bpl(MACHINE * m);           /* 10 */
+// void ora_ind_y(MACHINE *m)    /* 11 */ same as ora_abs_y
+void trb(MACHINE * m);           /* 14 */
+// void ora_a16_x(MACHINE *m)    /* 15 */ same as ora_a16
+// void asl_a16_x(MACHINE *m)    /* 16 */ same as asl_a16
+void clc(MACHINE * m);           /* 18 */
+void ora_abs_y(MACHINE * m);     /* 19 */
+//void trb_abs(MACHINE * m);     /* 1C */ same as trb
+void ora_abs_x(MACHINE * m);     /* 1D */
+// void asl_abs_x(MACHINE *m)    /* 1E */ same as asl_a16
+void jsr_abs(MACHINE * m);       /* 20 */
+void and_ind_x(MACHINE * m);     /* 21 */
+void bit_a16(MACHINE * m);       /* 24 */
+void and_a16(MACHINE * m);       /* 25 */
+void rol_a16(MACHINE * m);       /* 26 */
+void plp(MACHINE * m);           /* 28 */
+void and_imm(MACHINE * m);       /* 29 */
+void rol_a(MACHINE * m);         /* 2A */
+// void bit_abs(MACHINE *m)      /* 2C */ same as bit_a16
+void and_abs(MACHINE * m);       /* 2D */
+// void rol_abs(MACHINE *m)      /* 2E */ same as rol_a16
+void bmi(MACHINE * m);           /* 30 */
+// void and_ind_y(MACHINE *m)    /* 31 */ same as and_abs_y
+// void and_a16_x(MACHINE *m)    /* 35 */ same as and_a16
+// void rol_a16_x(MACHINE *m)    /* 36 */ same as rol_a16
+void sec(MACHINE * m);           /* 38 */
+void and_abs_y(MACHINE * m);     /* 39 */
+void and_abs_x(MACHINE * m);     /* 3D */
+// void rol_abs_x(MACHINE *m)    /* 3E */ same as rol_a16
+void rti(MACHINE * m);           /* 40 */
+// void eor_ind_x(MACHINE *m)    /* 41 */ same as eor_a16
+void eor_a16(MACHINE * m);       /* 45 */
+void lsr_a16(MACHINE * m);       /* 46 */
+void pha(MACHINE * m);           /* 48 */
+void eor_imm(MACHINE * m);       /* 49 */
+void lsr_a(MACHINE * m);         /* 4A */
+void jmp_abs(MACHINE * m);       /* 4C */
+void jmp_abs(MACHINE * m);       /* 4C */
+// void eor_abs(MACHINE *m)      /* 4D */ same as eor_a16
+// void lsr_abs(MACHINE *m)      /* 4E */ same as lsr_a16
+void bvc(MACHINE * m);           /* 50 */
+// void eor_ind_y(MACHINE *m)    /* 51 */ same as eor_abs_y
+// void eor_a16_x(MACHINE *m)    /* 55 */ same as eor_a16
+// void lsr_a16_x(MACHINE *m)    /* 56 */ same as lsr_a16
+void cli(MACHINE * m);           /* 58 */
+void eor_abs_y(MACHINE * m);     /* 59 */
+void eor_abs_x(MACHINE * m);     /* 5D */
+// void lsr_abs_x(MACHINE *m)    /* 5E */ same as lsr_a16
+void rts(MACHINE * m);           /* 60 */
+// void adc_ind_x(MACHINE *m)    /* 61 */ same as adc_a16
+void adc_a16(MACHINE * m);       /* 65 */
+void ror_a16(MACHINE * m);       /* 66 */
+void pla(MACHINE * m);           /* 68 */
+void adc_imm(MACHINE * m);       /* 69 */
+void ror_a(MACHINE * m);         /* 6A */
+void jmp_ind(MACHINE * m);       /* 6C */
+// void adc_abs(MACHINE *m)      /* 6D */ same as adc_a16
+// void ror_abs(MACHINE *m)      /* 6E */ same as ror_a16
+void bvs(MACHINE * m);           /* 70 */
+// void adc_ind_y(MACHINE *m)    /* 71 */ same as adc_abs_y
+// void adc_a16_x(MACHINE *m)    /* 75 */ same as adc_a16
+// void ror_a16_x(MACHINE *m)    /* 76 */ same as ror_a16
+void sei(MACHINE * m);           /* 78 */
+void adc_abs_y(MACHINE * m);     /* 79 */
+// void bra(MACHINE * m);           /* 80 */ // 65c02
+void adc_abs_x(MACHINE * m);     /* 7D */
+// void ror_abs_x(MACHINE *m)    /* 7E */ same as ror_a16
+// void sta_ind_x(MACHINE *m)    /* 81 */ same as sta_a16
+void sty_a16(MACHINE * m);       /* 84 */
+void sta_a16(MACHINE * m);       /* 85 */
+void stx_a16(MACHINE * m);       /* 86 */
+void dey(MACHINE * m);           /* 88 */
+void txa(MACHINE * m);           /* 8A */
+// void sty_abs(MACHINE *m)      /* 8C */ same as sty_a16
+// void sta_abs(MACHINE *m)      /* 8D */ same as sta_a16
+// void stx_abs(MACHINE *m)      /* 8E */ same as stx_a16
+void bcc(MACHINE * m);           /* 90 */
+// void sta_ind_y(MACHINE *m)    /* 91 */ same as sta_abs_y
+// void sty_a16_x(MACHINE *m)    /* 94 */ same as sty_a16
+// void sta_a16_x(MACHINE *m)    /* 95 */ same as sta_a16
+// void stx_a16_y(MACHINE *m)    /* 96 */ same as stx_a16
+void tya(MACHINE * m);           /* 98 */
+void sta_abs_y(MACHINE * m);     /* 99 */
+void txs(MACHINE * m);           /* 9A */
+void sta_abs_x(MACHINE * m);     /* 9D */
+void ldy_imm(MACHINE * m);       /* A0 */
+// void lda_ind_x(MACHINE *m)    /* A1 */ same as lda_a16
+void ldx_imm(MACHINE * m);       /* A2 */
+void ldy_a16(MACHINE * m);       /* A4 */
+void lda_a16(MACHINE * m);       /* A5 */
+void ldx_a16(MACHINE * m);       /* A6 */
+void tay(MACHINE * m);           /* A8 */
+void lda_imm(MACHINE * m);       /* A9 */
+void tax(MACHINE * m);           /* AA */
+// void ldy_abs(MACHINE *m)      /* AC */ same as ldy_a16
+// void lda_abs(MACHINE *m)      /* AD */ same as lda_a16
+// void ldx_abs(MACHINE *m)      /* AE */ same as ldx_a16
+void bcs(MACHINE * m);           /* B0 */
+// void lda_ind_y(MACHINE *m)    /* B1 */ same as lda_abs_y
+// void ldy_a16_x(MACHINE *m)    /* B4 */ same as ldy_a16
+// void lda_a16_x(MACHINE *m)    /* B5 */ same as lda_a16
+// void ldx_a16_y(MACHINE *m)    /* B6 */ same as ldx_a16
+void clv(MACHINE * m);           /* B8 */
+void lda_abs_y(MACHINE * m);     /* B9 */
+void tsx(MACHINE * m);           /* BA */
+void ldy_abs_x(MACHINE * m);     /* BC */
+void lda_abs_x(MACHINE * m);     /* BD */
+void ldx_abs_y(MACHINE * m);     /* BE */
+void cpy_imm(MACHINE * m);       /* C0 */
+// void cmp_ind_x(MACHINE *m)    /* C1 */ same as cmp_a16
+void cpy_a16(MACHINE * m);       /* C4 */
+void cmp_a16(MACHINE * m);       /* C5 */
+void dec_a16(MACHINE * m);       /* C6 */
+void iny(MACHINE * m);           /* C8 */
+void cmp_imm(MACHINE * m);       /* C9 */
+void dex(MACHINE * m);           /* CA */
+// void cpy_abs(MACHINE *m)      /* CC */ same as cpy_a16
+// void cmp_abs(MACHINE *m)      /* CD */ same as cmp_a16
+// void dec_abs(MACHINE *m)      /* CE */ same as dec_a16
+void bne(MACHINE * m);           /* D0 */
+// void cmp_ind_y(MACHINE *m)    /* D1 */ same as cmp_abs_y
+// void cmp_a16_x(MACHINE *m)    /* D5 */ same as cmp_a16
+// void dec_a16_x(MACHINE *m)    /* D6 */ same as dec_a16
+void cld(MACHINE * m);           /* D8 */
+void cmp_abs_y(MACHINE * m);     /* D9 */
+void cmp_abs_x(MACHINE * m);     /* DD */
+// void dec_abs_x(MACHINE *m)    /* DE */ same as dec_a16
+void cpx_imm(MACHINE * m);       /* E0 */
+// void sbc_ind_x(MACHINE *m)    /* E1 */ same as sbc_a16
+void cpx_a16(MACHINE * m);       /* E4 */
+void sbc_a16(MACHINE * m);       /* E5 */
+void inc_a16(MACHINE * m);       /* E6 */
+void inx(MACHINE * m);           /* E8 */
+void sbc_imm(MACHINE * m);       /* E9 */
+void nop(MACHINE * m);           /* EA */
+// void cpx_abs(MACHINE *m)      /* EC */ same as cpx_a16
+// void sbc_abs(MACHINE *m)      /* ED */ same as sbc_a16
+// void inc_abs(MACHINE *m)      /* EE */ same as inc_a16
+void beq(MACHINE * m);           /* F0 */
+// void sbc_ind_y(MACHINE *m)    /* F1 */ same as sbc_abs_y
+// void sbc_a16_x(MACHINE *m)    /* F5 */ same as sbc_a16
+// void inc_a16_x(MACHINE *m)    /* F6 */ same as inc_a16
+void sed(MACHINE * m);           /* F8 */
+void sbc_abs_y(MACHINE * m);     /* F9 */
+void sbc_abs_x(MACHINE * m);     /* FD */
+// void inc_abs_x(MACHINE *m)    /* FE */ same as inc_a16
 
 // All cycle stages for all instructions
 opcode_steps ADC_IMM[]   = {adc_imm};                               // 2
@@ -227,6 +204,7 @@ opcode_steps ADC_ZP_X[]  = {al_read_pc, read_a16_ind_x, adc_a16};   // 4
 opcode_steps ADC_ABS[]   = {al_read_pc, ah_read_pc, adc_a16};       // 4
 opcode_steps ADC_ABS_X[] = {al_read_pc, ah_read_pc, adc_abs_x};     // 4*
 opcode_steps ADC_ABS_Y[] = {al_read_pc, ah_read_pc, adc_abs_y};     // 4*
+opcode_steps ADC_IND[] =   {nop}; // 5 sqw
 opcode_steps ADC_IND_X[] = {al_read_pc, read_a16_ind_x, sl_read_a16, ah_read_a16_sl2al, adc_a16}; // 6
 opcode_steps ADC_IND_Y[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, adc_abs_y}; // 5*
 
@@ -249,13 +227,17 @@ opcode_steps BCC[]       = {bcc, branch};                           // 2**
 opcode_steps BCS[]       = {bcs, branch};                           // 2**
 opcode_steps BEQ[]       = {beq, branch};                           // 2**
 
-opcode_steps BIT_ZP[]    = {al_read_pc, bit_a16};                   // 3
 opcode_steps BIT_ABS[]   = {al_read_pc, ah_read_pc, bit_a16};       // 4
+opcode_steps BIT_ABS_X[] = {nop};                                   // 4 SQW
+opcode_steps BIT_IMM[]   = {nop};                                   // 2 SQW
+opcode_steps BIT_ZP[]    = {al_read_pc, bit_a16};                   // 3
+opcode_steps BIT_ZP_X[]  = {nop};                                   // 4 SQW
 
 opcode_steps BMI[]       = {bmi, branch};                           // 2**
 opcode_steps BNE[]       = {bne, branch};                           // 2**
 opcode_steps BPL[]       = {bpl, branch};                           // 2**
-opcode_steps BRK[]       = {al_read_pc, pc_hi_to_stack, pc_lo_to_stack, p_to_stack, brk_pc, brk}; // 7
+opcode_steps BRA[]       = {nop};                           // 3 SQW
+opcode_steps BRK[]       = {al_read_pc, pc_hi_to_stack, pc_lo_to_stack, p_to_stack, brk_pc, a2brk}; // 7
 opcode_steps BVC[]       = {bvc, branch};                           // 2**
 opcode_steps BVS[]       = {bvs, branch};                           // 2**
 
@@ -286,6 +268,7 @@ opcode_steps DEC_ZP_X[]  = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_write_a1
 opcode_steps DEC_ABS[]   = {al_read_pc, ah_read_pc, sl_read_a16, sl_write_a16, dec_a16}; // 6
 opcode_steps DEC_ABS_X[] = {al_read_pc, ah_read_pc, sl_read_xpf_a16, sl_read_x_a16, sl_write_a16, dec_a16}; // 7
 
+opcode_steps DEA[]       = {nop};                                   // 2 SQW
 opcode_steps DEX[]       = {dex};                                   // 2
 opcode_steps DEY[]       = {dey};                                   // 2
 
@@ -303,11 +286,13 @@ opcode_steps INC_ZP_X[]  = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_write_a1
 opcode_steps INC_ABS[]   = {al_read_pc, ah_read_pc, sl_read_a16, sl_write_a16, inc_a16}; // 6
 opcode_steps INC_ABS_X[] = {al_read_pc, ah_read_pc, sl_read_xpf_a16, sl_read_x_a16, sl_write_a16, inc_a16}; // 7
 
+opcode_steps INA[]       = {nop};                                   // 2 SQW
 opcode_steps INX[]       = {inx};                                   // 2
 opcode_steps INY[]       = {iny};                                   // 2
 
 opcode_steps JMP_ABS[]   = {al_read_pc, jmp_abs};                   // 3
 opcode_steps JMP_IND[]   = {al_read_pc, ah_read_pc, sl_read_a16, jmp_ind}; // 5
+opcode_steps JMP_IND_X[] = {nop}; // 6 SQW
 opcode_steps JSR_ABS[]   = {al_read_pc, read_sp, pc_hi_to_stack, pc_lo_to_stack, jsr_abs}; // 6
 
 opcode_steps LDA_IMM[]   = {lda_imm};                               // 2
@@ -350,8 +335,12 @@ opcode_steps ORA_IND_Y[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, ora_abs_
 
 opcode_steps PHA[]       = {read_pc, pha};                          // 3
 opcode_steps PHP[]       = {read_pc, php};                          // 3
+opcode_steps PHX[]       = {nop};                          // 3 SQW
+opcode_steps PHY[]       = {nop};                          // 3 SQW
 opcode_steps PLA[]       = {read_pc, read_sp, pla};                 // 4
 opcode_steps PLP[]       = {read_pc, read_sp, plp};                 // 4
+opcode_steps PLX[]       = {nop};                 // 4 SQW
+opcode_steps PLY[]       = {nop};                 // 4 SQW
 
 opcode_steps ROL_A[]     = {rol_a};                                 // 2
 opcode_steps ROL_ZP[]    = {al_read_pc, sl_read_a16, sl_write_a16, rol_a16}; // 5
@@ -397,8 +386,17 @@ opcode_steps STY_ZP[]    = {al_read_pc, sty_a16};                   // 3
 opcode_steps STY_ZP_X[]  = {al_read_pc, read_a16_ind_x, sty_a16};   // 4
 opcode_steps STY_ABS[]   = {al_read_pc, ah_read_pc, sty_a16};       // 4
 
+opcode_steps STZ_ABS[]   = {nop};       // 4 SQW
+opcode_steps STZ_ABS_X[] = {nop};       // 5 SQW
+opcode_steps STZ_ZP[]    = {nop}; // 3 SQW
+opcode_steps STZ_ZP_X[]  = {nop}; // 4 SQW
+
 opcode_steps TAX[]       = {tax};                                   // 2
 opcode_steps TAY[]       = {tay};                                   // 2
+opcode_steps TRB_ZP[]    = {al_read_pc, sl_read_a16, sl_read_a16, trb}; // 5
+opcode_steps TRB_ABS[]   = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, trb}; // 6
+opcode_steps TSB_ZP[]    = {al_read_pc, sl_read_a16, sl_read_a16, tsb}; // 5
+opcode_steps TSB_ABS[]   = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, tsb}; // 6
 opcode_steps TSX[]       = {tsx};                                   // 2
 opcode_steps TXA[]       = {txa};                                   // 2
 opcode_steps TXS[]       = {txs};                                   // 2
@@ -407,8 +405,10 @@ opcode_steps TYA[]       = {tya};                                   // 2
 // All cycles not implemented refer to the UNDEFINED stage, which is just an empty cycle for now
 opcode_steps UNDEFINED[] = {empty_cycle};
 
+opcode_steps **opcodes;
+
 // The 256 opcodes, as their stage (cycle) function pointer arrays
-opcode_steps *opcodes[256] = {
+opcode_steps *opcodes_6502[256] = {
     [0x00] = BRK,
     [0x01] = ORA_IND_X,
     [0x02] = UNDEFINED,
@@ -660,6 +660,265 @@ opcode_steps *opcodes[256] = {
     [0xF8] = SED,
     [0xF9] = SBC_ABS_Y,
     [0xFA] = UNDEFINED,
+    [0xFB] = UNDEFINED,
+    [0xFC] = UNDEFINED,
+    [0xFD] = SBC_ABS_X,
+    [0xFE] = INC_ABS_X,
+    [0xFF] = UNDEFINED,
+};
+
+opcode_steps *opcodes_65c02[256] = {
+    [0x00] = BRK,
+    [0x01] = ORA_IND_X,
+    [0x02] = UNDEFINED,
+    [0x03] = UNDEFINED,
+    [0x04] = TSB_ZP,
+    [0x05] = ORA_ZP,
+    [0x06] = ASL_ZP,
+    [0x07] = UNDEFINED,
+    [0x08] = PHP,
+    [0x09] = ORA_IMM,
+    [0x0A] = ASL_A,
+    [0x0B] = UNDEFINED,
+    [0x0C] = TSB_ABS,
+    [0x0D] = ORA_ABS,
+    [0x0E] = ASL_ABS,
+    [0x0F] = UNDEFINED,
+    [0x10] = BPL,
+    [0x11] = ORA_IND_Y,
+    [0x12] = ORA_ZP,
+    [0x13] = UNDEFINED,
+    [0x14] = TRB_ZP,
+    [0x15] = ORA_ZP_X,
+    [0x16] = ASL_ZP_X,
+    [0x17] = UNDEFINED,
+    [0x18] = CLC,
+    [0x19] = ORA_ABS_Y,
+    [0x1A] = INA,
+    [0x1B] = UNDEFINED,
+    [0x1C] = TRB_ABS,
+    [0x1D] = ORA_ABS_X,
+    [0x1E] = ASL_ABS_X,
+    [0x1F] = UNDEFINED,
+    [0x20] = JSR_ABS,
+    [0x21] = AND_IND_X,
+    [0x22] = UNDEFINED,
+    [0x23] = UNDEFINED,
+    [0x24] = BIT_ZP,
+    [0x25] = AND_ZP,
+    [0x26] = ROL_ZP,
+    [0x27] = UNDEFINED,
+    [0x28] = PLP,
+    [0x29] = AND_IMM,
+    [0x2A] = ROL_A,
+    [0x2B] = UNDEFINED,
+    [0x2C] = BIT_ABS,
+    [0x2D] = AND_ABS,
+    [0x2E] = ROL_ABS,
+    [0x2F] = UNDEFINED,
+    [0x30] = BMI,
+    [0x31] = AND_IND_Y,
+    [0x32] = AND_ZP,
+    [0x33] = UNDEFINED,
+    [0x34] = BIT_ZP_X,
+    [0x35] = AND_ZP_X,
+    [0x36] = ROL_ZP_X,
+    [0x37] = UNDEFINED,
+    [0x38] = SEC,
+    [0x39] = AND_ABS_Y,
+    [0x3A] = DEA,
+    [0x3B] = UNDEFINED,
+    [0x3C] = BIT_ABS_X,
+    [0x3D] = AND_ABS_X,
+    [0x3E] = ROL_ABS_X,
+    [0x3F] = UNDEFINED,
+    [0x40] = RTI,
+    [0x41] = EOR_IND_X,
+    [0x42] = UNDEFINED,
+    [0x43] = UNDEFINED,
+    [0x44] = UNDEFINED,
+    [0x45] = EOR_ZP,
+    [0x46] = LSR_ZP,
+    [0x47] = UNDEFINED,
+    [0x48] = PHA,
+    [0x49] = EOR_IMM,
+    [0x4A] = LSR_A,
+    [0x4B] = UNDEFINED,
+    [0x4C] = JMP_ABS,
+    [0x4D] = EOR_ABS,
+    [0x4E] = LSR_ABS,
+    [0x4F] = UNDEFINED,
+    [0x50] = BVC,
+    [0x51] = EOR_IND_Y,
+    [0x52] = EOR_ZP,
+    [0x53] = UNDEFINED,
+    [0x54] = UNDEFINED,
+    [0x55] = EOR_ZP_X,
+    [0x56] = LSR_ZP_X,
+    [0x57] = UNDEFINED,
+    [0x58] = CLI,
+    [0x59] = EOR_ABS_Y,
+    [0x5A] = PHY,
+    [0x5B] = UNDEFINED,
+    [0x5C] = UNDEFINED,
+    [0x5D] = EOR_ABS_X,
+    [0x5E] = LSR_ABS_X,
+    [0x5F] = UNDEFINED,
+    [0x60] = RTS,
+    [0x61] = ADC_IND_X,
+    [0x62] = UNDEFINED,
+    [0x63] = UNDEFINED,
+    [0x64] = STZ_ZP,
+    [0x65] = ADC_ZP,
+    [0x66] = ROR_ZP,
+    [0x67] = UNDEFINED,
+    [0x68] = PLA,
+    [0x69] = ADC_IMM,
+    [0x6A] = ROR_A,
+    [0x6B] = UNDEFINED,
+    [0x6C] = JMP_IND,
+    [0x6D] = ADC_ABS,
+    [0x6E] = ROR_ABS,
+    [0x6F] = UNDEFINED,
+    [0x70] = BVS,
+    [0x71] = ADC_IND_Y,
+    [0x72] = ADC_IND,
+    [0x73] = UNDEFINED,
+    [0x74] = STZ_ZP_X,
+    [0x75] = ADC_ZP_X,
+    [0x76] = ROR_ZP_X,
+    [0x77] = UNDEFINED,
+    [0x78] = SEI,
+    [0x79] = ADC_ABS_Y,
+    [0x7A] = PLY,
+    [0x7B] = UNDEFINED,
+    [0x7C] = JMP_IND_X,
+    [0x7D] = ADC_ABS_X,
+    [0x7E] = ROR_ABS_X,
+    [0x7F] = UNDEFINED,
+    [0x80] = BRA,
+    [0x81] = STA_IND_X,
+    [0x82] = UNDEFINED,
+    [0x83] = UNDEFINED,
+    [0x84] = STY_ZP,
+    [0x85] = STA_ZP,
+    [0x86] = STX_ZP,
+    [0x87] = UNDEFINED,
+    [0x88] = DEY,
+    [0x89] = BIT_IMM,
+    [0x8A] = TXA,
+    [0x8B] = UNDEFINED,
+    [0x8C] = STY_ABS,
+    [0x8D] = STA_ABS,
+    [0x8E] = STX_ABS,
+    [0x8F] = UNDEFINED,
+    [0x90] = BCC,
+    [0x91] = STA_IND_Y,
+    [0x92] = STA_ZP,
+    [0x93] = UNDEFINED,
+    [0x94] = STY_ZP_X,
+    [0x95] = STA_ZP_X,
+    [0x96] = STX_ZP_Y,
+    [0x97] = UNDEFINED,
+    [0x98] = TYA,
+    [0x99] = STA_ABS_Y,
+    [0x9A] = TXS,
+    [0x9B] = UNDEFINED,
+    [0x9C] = STZ_ABS,
+    [0x9D] = STA_ABS_X,
+    [0x9E] = STZ_ABS_X,
+    [0x9F] = UNDEFINED,
+    [0xA0] = LDY_IMM,
+    [0xA1] = LDA_IND_X,
+    [0xA2] = LDX_IMM,
+    [0xA3] = UNDEFINED,
+    [0xA4] = LDY_ZP,
+    [0xA5] = LDA_ZP,
+    [0xA6] = LDX_ZP,
+    [0xA7] = UNDEFINED,
+    [0xA8] = TAY,
+    [0xA9] = LDA_IMM,
+    [0xAA] = TAX,
+    [0xAB] = UNDEFINED,
+    [0xAC] = LDY_ABS,
+    [0xAD] = LDA_ABS,
+    [0xAE] = LDX_ABS,
+    [0xAF] = UNDEFINED,
+    [0xB0] = BCS,
+    [0xB1] = LDA_IND_Y,
+    [0xB2] = LDA_ZP,
+    [0xB3] = UNDEFINED,
+    [0xB4] = LDY_ZP_X,
+    [0xB5] = LDA_ZP_X,
+    [0xB6] = LDX_ZP_Y,
+    [0xB7] = UNDEFINED,
+    [0xB8] = CLV,
+    [0xB9] = LDA_ABS_Y,
+    [0xBA] = TSX,
+    [0xBB] = UNDEFINED,
+    [0xBC] = LDY_ABS_X,
+    [0xBD] = LDA_ABS_X,
+    [0xBE] = LDX_ABS_Y,
+    [0xBF] = UNDEFINED,
+    [0xC0] = CPY_IMM,
+    [0xC1] = CMP_IND_X,
+    [0xC2] = UNDEFINED,
+    [0xC3] = UNDEFINED,
+    [0xC4] = CPY_ZP,
+    [0xC5] = CMP_ZP,
+    [0xC6] = DEC_ZP,
+    [0xC7] = UNDEFINED,
+    [0xC8] = INY,
+    [0xC9] = CMP_IMM,
+    [0xCA] = DEX,
+    [0xCB] = UNDEFINED,
+    [0xCC] = CPY_ABS,
+    [0xCD] = CMP_ABS,
+    [0xCE] = DEC_ABS,
+    [0xCF] = UNDEFINED,
+    [0xD0] = BNE,
+    [0xD1] = CMP_IND_Y,
+    [0xD2] = CMP_ZP,
+    [0xD3] = UNDEFINED,
+    [0xD4] = UNDEFINED,
+    [0xD5] = CMP_ZP_X,
+    [0xD6] = DEC_ZP_X,
+    [0xD7] = UNDEFINED,
+    [0xD8] = CLD,
+    [0xD9] = CMP_ABS_Y,
+    [0xDA] = PHX,
+    [0xDB] = UNDEFINED,
+    [0xDC] = UNDEFINED,
+    [0xDD] = CMP_ABS_X,
+    [0xDE] = DEC_ABS_X,
+    [0xDF] = UNDEFINED,
+    [0xE0] = CPX_IMM,
+    [0xE1] = SBC_IND_X,
+    [0xE2] = UNDEFINED,
+    [0xE3] = UNDEFINED,
+    [0xE4] = CPX_ZP,
+    [0xE5] = SBC_ZP,
+    [0xE6] = INC_ZP,
+    [0xE7] = UNDEFINED,
+    [0xE8] = INX,
+    [0xE9] = SBC_IMM,
+    [0xEA] = NOP,
+    [0xEB] = UNDEFINED,
+    [0xEC] = CPX_ABS,
+    [0xED] = SBC_ABS,
+    [0xEE] = INC_ABS,
+    [0xEF] = UNDEFINED,
+    [0xF0] = BEQ,
+    [0xF1] = SBC_IND_Y,
+    [0xF2] = SBC_ZP,
+    [0xF3] = UNDEFINED,
+    [0xF4] = UNDEFINED,
+    [0xF5] = SBC_ZP_X,
+    [0xF6] = INC_ZP_X,
+    [0xF7] = UNDEFINED,
+    [0xF8] = SED,
+    [0xF9] = SBC_ABS_Y,
+    [0xFA] = PLX,
     [0xFB] = UNDEFINED,
     [0xFC] = UNDEFINED,
     [0xFD] = SBC_ABS_X,
@@ -1146,7 +1405,7 @@ void bpl(MACHINE *m) {
     }
 }
 
-void brk(MACHINE *m) {
+void a2brk(MACHINE *m) {
     ah_read_pc(m);
     m->cpu.pc = m->cpu.address_16;
     // Interrupt flag on at break
@@ -1592,6 +1851,20 @@ void tax(MACHINE *m) {
 void tay(MACHINE *m) {
     read_pc(m);
     set_register_to_value(m, &m->cpu.Y, m->cpu.A);
+    m->cpu.instruction_cycle = -1;
+}
+
+void trb(MACHINE *m) {
+    m->cpu.Z = (m->cpu.A & m->cpu.scratch_lo) == 0;
+    m->cpu.scratch_lo = (m->cpu.A ^ 0xff) & m->cpu.scratch_lo;
+    write_to_memory(m, m->cpu.address_16, m->cpu.scratch_lo);
+    m->cpu.instruction_cycle = -1;
+}
+
+void tsb(MACHINE *m) {
+    m->cpu.Z = (m->cpu.A & m->cpu.scratch_lo) == 0;
+    m->cpu.scratch_lo |= m->cpu.A;
+    write_to_memory(m, m->cpu.address_16, m->cpu.scratch_lo);
     m->cpu.instruction_cycle = -1;
 }
 

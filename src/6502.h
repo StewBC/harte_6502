@@ -107,7 +107,9 @@ struct MACHINE
 typedef struct MACHINE MACHINE;
 
 // The 256 possible opcodes
-extern  opcode_steps *opcodes[256];
+extern  opcode_steps **opcodes;
+extern  opcode_steps *opcodes_6502[256];
+extern  opcode_steps *opcodes_65c02[256];
 // The UNDEFINED step (cycle) is for the unimplemented opcodes
 extern  opcode_steps UNDEFINED[];
 
