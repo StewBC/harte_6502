@@ -243,10 +243,10 @@ void io_write_callback(MACHINE *m, uint16_t address, uint8_t value) {
 }
 
 // Create the test machine configuration
-int configure_Harte(MACHINE *m) {
+int configure_Harte(MACHINE *m, opcode_steps **cpu_type) {
     uint8_t *file_data;
 
-    opcodes = opcodes_65c02;
+    opcodes = cpu_type;
 
     // RAM
     if(!ram_init(&m->ram, 1)) {
@@ -433,8 +433,14 @@ int processFile(const char *filePath) {
 }
 
 int main(int argc, char **argv) {
+    int ergv = 0;
+    opcode_steps **cpu_type = opcodes_6502;
     logInit();
-    if(argc < 2) {
+    if(argc >= 2 && argv[1][0] == '-') {
+        ergv++;
+        cpu_type = opcodes_65c02;
+    }
+    if(argc < 2 + ergv) {
         logMessage(CHAN_ERROR, "USAGE: %s <directory/*.json>\n"\
                "   where *.json is a particluar (ex. a9.json) or\n"\
                "   all (*.json) files from the HARTE test to run.\n",
@@ -445,7 +451,7 @@ int main(int argc, char **argv) {
     logChannelOFF(CHAN_SUCCESS);
 
     // Set this machine up as a harte test computer
-    if(!configure_Harte(&m)) {
+    if(!configure_Harte(&m, cpu_type)) {
         logMessage(CHAN_ERROR, "Failed to configure Harte Test Computer\n");
         return 1;   // FAIL code at OS level
     }
@@ -458,7 +464,7 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
     WIN32_FIND_DATA findFileData;
     HANDLE hFind = INVALID_HANDLE_VALUE;
-    hFind = FindFirstFile(argv[1], &findFileData);
+    hFind = FindFirstFile(argv[ergv+1], &findFileData);
 
     // Iterate over files that match the command line wildcard
     if (hFind == INVALID_HANDLE_VALUE) {
@@ -466,8 +472,8 @@ int main(int argc, char **argv) {
         return 1;
     } else {
         char filePath[MAX_PATH];
-        int nameOffset = strrtok(argv[1]);
-        strncpy(filePath, argv[1], nameOffset);
+        int nameOffset = strrtok(argv[ergv+1]);
+        strncpy(filePath, argv[ergv+1], nameOffset);
         do {
             snprintf(filePath+nameOffset, MAX_PATH-nameOffset, "%s", findFileData.cFileName);
             logMessage(CHAN_TEST_INFO, "Test File: %s\n", findFileData.cFileName);
@@ -479,8 +485,8 @@ int main(int argc, char **argv) {
 #else
     int i;
     for(i = 1; i < argc; i++) {
-        logMessage(CHAN_TEST_INFO, "Test File: %s\n", &argv[i][strrtok(argv[i])]);
-        processFile(argv[i]);
+        logMessage(CHAN_TEST_INFO, "Test File: %s\n", &argv[ergv+i][strrtok(argv[ergv+i])]);
+        processFile(argv[ergv+i]);
     }
 #endif
 
