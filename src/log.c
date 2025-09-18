@@ -9,7 +9,11 @@
 LOG logObject;
 
 void logInit() {
+#ifdef SHORT_FORM
+    logObject.channelMask = 0xffffffe7; // ~(CHAN_FILTER | CHAN_FAIL)
+#else
     logObject.channelMask = 0xffffffff;
+#endif
     logObject.logStream = stdout;
     logObject.logFile = NULL;
     logObject.logFileName = NULL;

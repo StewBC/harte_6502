@@ -395,7 +395,7 @@ int processFile(const char *filePath) {
             int result = runTest(aTest, ++testNumber, &failState);
             switch(result) {
                 case RESULT_PREP_ERROR:
-                    logToStr(CHAN_TEST_INFO, 1, " - SKIPPED - other (JSON?) error\n");
+                    logToStr(CHAN_ERROR, 1, " - SKIPPED - other (JSON?) error\n");
                     testsSkipped++;
                     break;
                 case RESULT_SUCCESS:
@@ -407,13 +407,14 @@ int processFile(const char *filePath) {
                     testsFailed++;
                     break;
                 case RESULT_FILTERED_OUT:
-                    logToStr(CHAN_TEST_INFO, 1, " - SKIPPED - filtered out\n");
+                    logToStr(CHAN_FILTER, 1, " - SKIPPED - filtered out\n");
                     testsSkipped++;
                     break;
                 default:
                     logToStr(CHAN_ERROR, 1, " - Unknown result code\n");
             }
 
+            // Always reset the string
             logClearString();
 
             // If unimplemented opcode, break out of this loop of tests
@@ -476,7 +477,9 @@ int main(int argc, char **argv) {
         strncpy(filePath, argv[ergv+1], nameOffset);
         do {
             snprintf(filePath+nameOffset, MAX_PATH-nameOffset, "%s", findFileData.cFileName);
+#ifndef SHORT_FORM
             logMessage(CHAN_TEST_INFO, "Test File: %s\n", findFileData.cFileName);
+#endif
             // Process all matching files in turn
             processFile(filePath);
         } while (FindNextFile(hFind, &findFileData) != 0);
@@ -485,11 +488,22 @@ int main(int argc, char **argv) {
 #else
     int i;
     for(i = 1; i < argc; i++) {
+#ifndef SHORT_FORM
         logMessage(CHAN_TEST_INFO, "Test File: %s\n", &argv[ergv+i][strrtok(argv[ergv+i])]);
+#endif        
         processFile(argv[ergv+i]);
     }
 #endif
 
+#ifdef SHORT_FORM
+    logMessage(CHAN_TEST_INFO, "TEST %.2s: "\
+                               "Ran: %5d "\
+                               "Passed: %5d "\
+                               "Failed: %5d "\
+                               "Skipped: %d "\
+                               "Percent: %3.2f%%\n",
+                               findFileData.cFileName, testNumber - testsSkipped, testsPassed, testsFailed, testsSkipped, testsPassed + testsFailed ? (double)(testsPassed*100)/(testsPassed + testsFailed) : 0);
+#else
     logMessage(CHAN_TEST_INFO, "TEST RESULTS:\n"\
                                "Ran    : %d\n"\
                                "Passed : %d\n"\
@@ -497,5 +511,6 @@ int main(int argc, char **argv) {
                                "Skipped: %d\n"\
                                "Percent: %3.2f%%\n",
                                testNumber - testsSkipped, testsPassed, testsFailed, testsSkipped, testsPassed + testsFailed ? (double)(testsPassed*100)/(testsPassed + testsFailed) : 0);
+#endif                               
     return 0;   // SUCCESS code at OS level
 }
