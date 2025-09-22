@@ -212,10 +212,13 @@ void tya(MACHINE * m);           /* 98 */
 
 // 65c02 Specific stage instructions
 void a2brk_65c02(MACHINE *m);
+void bit_a16_65c02(MACHINE *m);
 void bra_65c02(MACHINE * m);
+void dea_65c02(MACHINE * m);
 void ina_65c02(MACHINE * m);
 void nop2b_65c02(MACHINE *m);
 void nop2b3c_65c02(MACHINE *m);
+void nop3b4c_65c02(MACHINE *m);
 
 // All cycle stages for all instructions
 opcode_steps ADC_IMM[]   = {adc_imm};                               // 2
@@ -406,29 +409,37 @@ opcode_steps TXS[]       = {txs};                                   // 2
 opcode_steps TYA[]       = {tya};                                   // 2
 
 // 65c02 opcode steps
-opcode_steps ADC_IND[] =   {nop}; // 5 sqw
+opcode_steps ADC_IND[]          = {nop}; // 5 sqw
+opcode_steps AND_ZP_65c02[]     = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, and_abs}; // 5
+// opcode_steps AND_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, and_a16}; // 6
 opcode_steps ASL_A_65c02[]      = {asl_a};                                 // 2
 opcode_steps ASL_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, asl_a16}; // 5
 opcode_steps ASL_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, asl_a16}; // 6
 opcode_steps ASL_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, asl_a16}; // 6
 opcode_steps ASL_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, sl_read_xpf_a16, sl_read_x_a16, asl_a16}; // 7
-opcode_steps BIT_ABS_X_65c02[]  = {nop};                                   // 4 SQW
+opcode_steps BIT_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, bit_a16_65c02};  // 4 SQW
 opcode_steps BIT_IMM_65c02[]    = {nop};                                   // 2 SQW
-opcode_steps BIT_ZP_X_65c02[]   = {nop};                                   // 4 SQW
+opcode_steps BIT_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, bit_a16};                                   // 4 SQW
 opcode_steps BRA_65c02[]        = {nop};                           // 3 SQW
 opcode_steps BRK_65c02[]        = {al_read_pc, pc_hi_to_stack, pc_lo_to_stack, p_to_stack, brk_pc, a2brk_65c02}; // 7
-opcode_steps DEA_65c02[]        = {nop};                                   // 2 SQW
+opcode_steps DEA_65c02[]        = {dea_65c02};                                   // 2 SQW
 opcode_steps INA_65c02[]        = {ina_65c02};                                   // 2 SQW
 opcode_steps JMP_IND_X_65c02[]  = {nop}; // 6 SQW
 opcode_steps NOP_2B2C_65c02[]   = {nop2b_65c02};                           // 2
 opcode_steps NOP_2B3C_65c02[]   = {al_read_pc, sl_read_a16, nop2b3c_65c02};         // 3
 opcode_steps NOP_3B3C_65c02[]   = {al_read_pc, nop2b_65c02};         // 3
+opcode_steps NOP_3B4C_65c02[]   = {al_read_pc, al_read_pc, nop3b4c_65c02};         // 3
 opcode_steps NOP_2B5C_65c02[]   = {al_read_pc, read_a16_ind_x, nop2b_65c02};         // 3
 opcode_steps ORA_IND_ZP_65c02[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, ora_a16}; // 5
 opcode_steps PHX_65c02[]        = {nop};                          // 3 SQW
 opcode_steps PHY_65c02[]        = {nop};                          // 3 SQW
 opcode_steps PLX_65c02[]        = {nop};                 // 4 SQW
 opcode_steps PLY_65c02[]        = {nop};                 // 4 SQW
+opcode_steps ROL_A_65c02[]      = {rol_a};                                 // 2
+opcode_steps ROL_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, rol_a16}; // 5
+opcode_steps ROL_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, rol_a16}; // 6
+opcode_steps ROL_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, rol_a16}; // 6
+opcode_steps ROL_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, sl_read_xpf_a16, sl_read_x_a16, rol_a16}; // 7
 opcode_steps STZ_ABS_65c02[]    = {nop};       // 4 SQW
 opcode_steps STZ_ABS_X_65c02[]  = {nop};       // 5 SQW
 opcode_steps STZ_ZP_65c02[]     = {nop}; // 3 SQW
@@ -731,47 +742,47 @@ opcode_steps *opcodes_65c02[256] = {
     [0x1C] = TRB_ABS,
     [0x1D] = ORA_ABS_X,
     [0x1E] = ASL_ABS_X_65c02,
-    [0x1F] = NOP,
+    [0x1F] = NOP_3B4C_65c02,
     [0x20] = JSR_ABS,
     [0x21] = AND_IND_X,
-    [0x22] = NOP,
+    [0x22] = NOP_2B2C_65c02,
     [0x23] = NOP,
     [0x24] = BIT_ZP,
     [0x25] = AND_ZP,
-    [0x26] = ROL_ZP,
-    [0x27] = NOP,
+    [0x26] = ROL_ZP_65c02,
+    [0x27] = NOP_2B3C_65c02,
     [0x28] = PLP,
     [0x29] = AND_IMM,
     [0x2A] = ROL_A,
     [0x2B] = NOP,
     [0x2C] = BIT_ABS,
     [0x2D] = AND_ABS,
-    [0x2E] = ROL_ABS,
-    [0x2F] = NOP,
+    [0x2E] = ROL_ABS_65c02,
+    [0x2F] = NOP_3B4C_65c02,
     [0x30] = BMI,
     [0x31] = AND_IND_Y,
-    [0x32] = AND_ZP,
+    [0x32] = AND_ZP_65c02,
     [0x33] = NOP,
     [0x34] = BIT_ZP_X_65c02,
     [0x35] = AND_ZP_X,
-    [0x36] = ROL_ZP_X,
-    [0x37] = NOP,
+    [0x36] = ROL_ZP_X_65c02,
+    [0x37] = NOP_2B3C_65c02,
     [0x38] = SEC,
     [0x39] = AND_ABS_Y,
     [0x3A] = DEA_65c02,
     [0x3B] = NOP,
     [0x3C] = BIT_ABS_X_65c02,
     [0x3D] = AND_ABS_X,
-    [0x3E] = ROL_ABS_X,
-    [0x3F] = NOP,
+    [0x3E] = ROL_ABS_X_65c02,
+    [0x3F] = NOP_3B4C_65c02,
     [0x40] = RTI,
     [0x41] = EOR_IND_X,
-    [0x42] = NOP,
+    [0x42] = NOP_2B5C_65c02,
     [0x43] = NOP,
     [0x44] = NOP_2B3C_65c02,
     [0x45] = EOR_ZP,
     [0x46] = LSR_ZP,
-    [0x47] = NOP,
+    [0x47] = NOP_2B3C_65c02,
     [0x48] = PHA,
     [0x49] = EOR_IMM,
     [0x4A] = LSR_A,
@@ -779,7 +790,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x4C] = JMP_ABS,
     [0x4D] = EOR_ABS,
     [0x4E] = LSR_ABS,
-    [0x4F] = NOP,
+    [0x4F] = NOP_3B4C_65c02,
     [0x50] = BVC,
     [0x51] = EOR_IND_Y,
     [0x52] = EOR_ZP,
@@ -787,7 +798,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x54] = NOP,
     [0x55] = EOR_ZP_X,
     [0x56] = LSR_ZP_X,
-    [0x57] = NOP,
+    [0x57] = NOP_2B3C_65c02,
     [0x58] = CLI,
     [0x59] = EOR_ABS_Y,
     [0x5A] = PHY_65c02,
@@ -795,7 +806,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x5C] = NOP,
     [0x5D] = EOR_ABS_X,
     [0x5E] = LSR_ABS_X,
-    [0x5F] = NOP,
+    [0x5F] = NOP_3B4C_65c02,
     [0x60] = RTS,
     [0x61] = ADC_IND_X,
     [0x62] = NOP,
@@ -803,7 +814,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x64] = STZ_ZP_65c02,
     [0x65] = ADC_ZP,
     [0x66] = ROR_ZP,
-    [0x67] = NOP,
+    [0x67] = NOP_2B3C_65c02,
     [0x68] = PLA,
     [0x69] = ADC_IMM,
     [0x6A] = ROR_A,
@@ -811,7 +822,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x6C] = JMP_IND,
     [0x6D] = ADC_ABS,
     [0x6E] = ROR_ABS,
-    [0x6F] = NOP,
+    [0x6F] = NOP_3B4C_65c02,
     [0x70] = BVS,
     [0x71] = ADC_IND_Y,
     [0x72] = ADC_IND,
@@ -819,7 +830,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x74] = STZ_ZP_X_65c02,
     [0x75] = ADC_ZP_X,
     [0x76] = ROR_ZP_X,
-    [0x77] = NOP,
+    [0x77] = NOP_2B3C_65c02,
     [0x78] = SEI,
     [0x79] = ADC_ABS_Y,
     [0x7A] = PLY_65c02,
@@ -827,7 +838,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x7C] = JMP_IND_X_65c02,
     [0x7D] = ADC_ABS_X,
     [0x7E] = ROR_ABS_X,
-    [0x7F] = NOP,
+    [0x7F] = NOP_3B4C_65c02,
     [0x80] = BRA_65c02,
     [0x81] = STA_IND_X,
     [0x82] = NOP,
@@ -835,7 +846,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x84] = STY_ZP,
     [0x85] = STA_ZP,
     [0x86] = STX_ZP,
-    [0x87] = NOP,
+    [0x87] = NOP_2B3C_65c02,
     [0x88] = DEY,
     [0x89] = BIT_IMM_65c02,
     [0x8A] = TXA,
@@ -843,7 +854,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x8C] = STY_ABS,
     [0x8D] = STA_ABS,
     [0x8E] = STX_ABS,
-    [0x8F] = NOP,
+    [0x8F] = NOP_3B4C_65c02,
     [0x90] = BCC,
     [0x91] = STA_IND_Y,
     [0x92] = STA_ZP,
@@ -851,7 +862,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x94] = STY_ZP_X,
     [0x95] = STA_ZP_X,
     [0x96] = STX_ZP_Y,
-    [0x97] = NOP,
+    [0x97] = NOP_2B3C_65c02,
     [0x98] = TYA,
     [0x99] = STA_ABS_Y,
     [0x9A] = TXS,
@@ -859,7 +870,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x9C] = STZ_ABS_65c02,
     [0x9D] = STA_ABS_X,
     [0x9E] = STZ_ABS_X_65c02,
-    [0x9F] = NOP,
+    [0x9F] = NOP_3B4C_65c02,
     [0xA0] = LDY_IMM,
     [0xA1] = LDA_IND_X,
     [0xA2] = LDX_IMM,
@@ -867,7 +878,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xA4] = LDY_ZP,
     [0xA5] = LDA_ZP,
     [0xA6] = LDX_ZP,
-    [0xA7] = NOP,
+    [0xA7] = NOP_2B3C_65c02,
     [0xA8] = TAY,
     [0xA9] = LDA_IMM,
     [0xAA] = TAX,
@@ -875,7 +886,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xAC] = LDY_ABS,
     [0xAD] = LDA_ABS,
     [0xAE] = LDX_ABS,
-    [0xAF] = NOP,
+    [0xAF] = NOP_3B4C_65c02,
     [0xB0] = BCS,
     [0xB1] = LDA_IND_Y,
     [0xB2] = LDA_ZP,
@@ -883,7 +894,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xB4] = LDY_ZP_X,
     [0xB5] = LDA_ZP_X,
     [0xB6] = LDX_ZP_Y,
-    [0xB7] = NOP,
+    [0xB7] = NOP_2B3C_65c02,
     [0xB8] = CLV,
     [0xB9] = LDA_ABS_Y,
     [0xBA] = TSX,
@@ -891,7 +902,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xBC] = LDY_ABS_X,
     [0xBD] = LDA_ABS_X,
     [0xBE] = LDX_ABS_Y,
-    [0xBF] = NOP,
+    [0xBF] = NOP_3B4C_65c02,
     [0xC0] = CPY_IMM,
     [0xC1] = CMP_IND_X,
     [0xC2] = NOP,
@@ -899,7 +910,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xC4] = CPY_ZP,
     [0xC5] = CMP_ZP,
     [0xC6] = DEC_ZP,
-    [0xC7] = NOP,
+    [0xC7] = NOP_2B3C_65c02,
     [0xC8] = INY,
     [0xC9] = CMP_IMM,
     [0xCA] = DEX,
@@ -907,7 +918,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xCC] = CPY_ABS,
     [0xCD] = CMP_ABS,
     [0xCE] = DEC_ABS,
-    [0xCF] = NOP,
+    [0xCF] = NOP_3B4C_65c02,
     [0xD0] = BNE,
     [0xD1] = CMP_IND_Y,
     [0xD2] = CMP_ZP,
@@ -915,7 +926,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xD4] = NOP,
     [0xD5] = CMP_ZP_X,
     [0xD6] = DEC_ZP_X,
-    [0xD7] = NOP,
+    [0xD7] = NOP_2B3C_65c02,
     [0xD8] = CLD,
     [0xD9] = CMP_ABS_Y,
     [0xDA] = PHX_65c02,
@@ -923,7 +934,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xDC] = NOP,
     [0xDD] = CMP_ABS_X,
     [0xDE] = DEC_ABS_X,
-    [0xDF] = NOP,
+    [0xDF] = NOP_3B4C_65c02,
     [0xE0] = CPX_IMM,
     [0xE1] = SBC_IND_X,
     [0xE2] = NOP,
@@ -931,7 +942,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xE4] = CPX_ZP,
     [0xE5] = SBC_ZP,
     [0xE6] = INC_ZP,
-    [0xE7] = NOP,
+    [0xE7] = NOP_2B3C_65c02,
     [0xE8] = INX,
     [0xE9] = SBC_IMM,
     [0xEA] = NOP,
@@ -939,7 +950,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xEC] = CPX_ABS,
     [0xED] = SBC_ABS,
     [0xEE] = INC_ABS,
-    [0xEF] = NOP,
+    [0xEF] = NOP_3B4C_65c02,
     [0xF0] = BEQ,
     [0xF1] = SBC_IND_Y,
     [0xF2] = SBC_ZP,
@@ -947,7 +958,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xF4] = NOP,
     [0xF5] = SBC_ZP_X,
     [0xF6] = INC_ZP_X,
-    [0xF7] = NOP,
+    [0xF7] = NOP_2B3C_65c02,
     [0xF8] = SED,
     [0xF9] = SBC_ABS_Y,
     [0xFA] = PLX_65c02,
@@ -955,7 +966,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xFC] = NOP,
     [0xFD] = SBC_ABS_X,
     [0xFE] = INC_ABS_X,
-    [0xFF] = NOP,
+    [0xFF] = NOP_3B4C_65c02,
 };
 
 // Configure RAM
@@ -1288,12 +1299,18 @@ void sl_read_x_a16(MACHINE *m) {
 }
 
 void sl_read_xpf_a16(MACHINE *m) {
-    if(m->cpu.address_lo + m->cpu.X >= 0x100) {
-        m->cpu.page_fault = 1;
+    if(opcodes == opcodes_6502) {
+        if(m->cpu.address_lo + m->cpu.X >= 0x100) {
+            m->cpu.page_fault = 1;
+        }
+        m->cpu.address_lo += m->cpu.X;
+        m->cpu.scratch_lo = read_from_memory(m, m->cpu.address_16);
+        m->cpu.instruction_cycle++;
+    } else {
+        if(!check_page_fault(m, m->cpu.X)) {
+            m->cpu.instruction_cycle++;
+        }
     }
-    m->cpu.address_lo += m->cpu.X;
-    m->cpu.scratch_lo = read_from_memory(m, m->cpu.address_16);
-    m->cpu.instruction_cycle++;
 }
 
 void sl_read_ypf_a16(MACHINE *m) {
@@ -1960,6 +1977,21 @@ void a2brk_65c02(MACHINE *m) {
     m->cpu.instruction_cycle = -1;
 }
 
+void bit_a16_65c02(MACHINE *m) {
+    if(!check_page_fault(m, m->cpu.X)) {
+        m->cpu.instruction_cycle = -1;
+        set_register_to_value(m, &m->cpu.scratch_hi, m->cpu.A & m->cpu.scratch_lo);
+        m->cpu.flags &= 0b00111111;
+        m->cpu.flags |= (m->cpu.scratch_lo & 0b11000000);
+    }
+}
+
+void dea_65c02(MACHINE * m) {
+    read_from_memory(m, m->cpu.pc);
+    set_register_to_value(m, &m->cpu.A, m->cpu.A - 1);
+    m->cpu.instruction_cycle = -1;
+}
+
 void ina_65c02(MACHINE * m) {
     read_from_memory(m, m->cpu.pc);
     set_register_to_value(m, &m->cpu.A, m->cpu.A + 1);
@@ -1975,5 +2007,10 @@ void nop2b_65c02(MACHINE *m) {
 void nop2b3c_65c02(MACHINE *m) {
     m->cpu.address_lo += m->cpu.X;
     read_from_memory(m, m->cpu.address_16);
+    m->cpu.instruction_cycle = -1;
+}
+
+void nop3b4c_65c02(MACHINE *m) {
+    read_from_memory(m, m->cpu.pc-1);
     m->cpu.instruction_cycle = -1;
 }
