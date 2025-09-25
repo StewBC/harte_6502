@@ -212,6 +212,7 @@ void tya(MACHINE * m);           /* 98 */
 
 // 65c02 Specific stage instructions
 void a2brk_65c02(MACHINE *m);
+void adc_a16_65c02(MACHINE *m);
 void bit_a16_65c02(MACHINE *m);
 void bra_65c02(MACHINE * m);
 void dea_65c02(MACHINE * m);
@@ -219,6 +220,10 @@ void ina_65c02(MACHINE * m);
 void nop2b_65c02(MACHINE *m);
 void nop2b3c_65c02(MACHINE *m);
 void nop3b4c_65c02(MACHINE *m);
+void phx_65c02(MACHINE *m);
+void phy_65c02(MACHINE *m);
+void plx_65c02(MACHINE *m);
+void ply_65c02(MACHINE *m);
 
 // All cycle stages for all instructions
 opcode_steps ADC_IMM[]   = {adc_imm};                               // 2
@@ -409,8 +414,9 @@ opcode_steps TXS[]       = {txs};                                   // 2
 opcode_steps TYA[]       = {tya};                                   // 2
 
 // 65c02 opcode steps
-opcode_steps ADC_IND[]          = {nop}; // 5 sqw
-opcode_steps AND_ZP_65c02[]     = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, and_abs}; // 5
+opcode_steps ADC_IND_ZP[]        = {nop}; // 5 sqw
+opcode_steps AND_IND_ZP_65c02[]  = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, and_abs}; // 5
+opcode_steps ADC_IND_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, ah_read_a16_sl2al, adc_a16_65c02}; // 6
 // opcode_steps AND_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, and_a16}; // 6
 opcode_steps ASL_A_65c02[]      = {asl_a};                                 // 2
 opcode_steps ASL_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, asl_a16}; // 5
@@ -423,18 +429,24 @@ opcode_steps BIT_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, bit_a16};        
 opcode_steps BRA_65c02[]        = {nop};                           // 3 SQW
 opcode_steps BRK_65c02[]        = {al_read_pc, pc_hi_to_stack, pc_lo_to_stack, p_to_stack, brk_pc, a2brk_65c02}; // 7
 opcode_steps DEA_65c02[]        = {dea_65c02};                                   // 2 SQW
+opcode_steps EOR_IND_ZP_65c02[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, eor_a16}; // 5
 opcode_steps INA_65c02[]        = {ina_65c02};                                   // 2 SQW
 opcode_steps JMP_IND_X_65c02[]  = {nop}; // 6 SQW
+opcode_steps LSR_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, lsr_a16}; // 5
+opcode_steps LSR_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, lsr_a16}; // 6
+opcode_steps LSR_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, lsr_a16}; // 6
+opcode_steps LSR_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, sl_read_xpf_a16, sl_read_x_a16, lsr_a16}; // 7
 opcode_steps NOP_2B2C_65c02[]   = {nop2b_65c02};                           // 2
-opcode_steps NOP_2B3C_65c02[]   = {al_read_pc, sl_read_a16, nop2b3c_65c02};         // 3
+opcode_steps NOP_2B4C_65c02[]   = {al_read_pc, sl_read_a16, nop2b3c_65c02};         // 4
 opcode_steps NOP_3B3C_65c02[]   = {al_read_pc, nop2b_65c02};         // 3
 opcode_steps NOP_3B4C_65c02[]   = {al_read_pc, al_read_pc, nop3b4c_65c02};         // 3
 opcode_steps NOP_2B5C_65c02[]   = {al_read_pc, read_a16_ind_x, nop2b_65c02};         // 3
+opcode_steps NOP_3B5C_65c02[]   = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, nop2b3c_65c02};
 opcode_steps ORA_IND_ZP_65c02[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, ora_a16}; // 5
-opcode_steps PHX_65c02[]        = {nop};                          // 3 SQW
-opcode_steps PHY_65c02[]        = {nop};                          // 3 SQW
-opcode_steps PLX_65c02[]        = {nop};                 // 4 SQW
-opcode_steps PLY_65c02[]        = {nop};                 // 4 SQW
+opcode_steps PHX_65c02[]        = {read_pc, phx_65c02};                          // 3 SQW
+opcode_steps PHY_65c02[]        = {read_pc, phy_65c02};                          // 3 SQW
+opcode_steps PLX_65c02[]        = {read_pc, read_sp, plx_65c02};                 // 4 SQW
+opcode_steps PLY_65c02[]        = {read_pc, read_sp, ply_65c02};                 // 4 SQW
 opcode_steps ROL_A_65c02[]      = {rol_a};                                 // 2
 opcode_steps ROL_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, rol_a16}; // 5
 opcode_steps ROL_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, rol_a16}; // 6
@@ -718,7 +730,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x04] = TSB_ZP,
     [0x05] = ORA_ZP,
     [0x06] = ASL_ZP_65c02,
-    [0x07] = NOP_2B3C_65c02,
+    [0x07] = NOP_2B4C_65c02,
     [0x08] = PHP,
     [0x09] = ORA_IMM,
     [0x0A] = ASL_A_65c02,
@@ -734,7 +746,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x14] = TRB_ZP,
     [0x15] = ORA_ZP_X,
     [0x16] = ASL_ZP_X_65c02,
-    [0x17] = NOP_2B3C_65c02,
+    [0x17] = NOP_2B4C_65c02,
     [0x18] = CLC,
     [0x19] = ORA_ABS_Y,
     [0x1A] = INA_65c02,
@@ -750,7 +762,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x24] = BIT_ZP,
     [0x25] = AND_ZP,
     [0x26] = ROL_ZP_65c02,
-    [0x27] = NOP_2B3C_65c02,
+    [0x27] = NOP_2B4C_65c02,
     [0x28] = PLP,
     [0x29] = AND_IMM,
     [0x2A] = ROL_A,
@@ -761,12 +773,12 @@ opcode_steps *opcodes_65c02[256] = {
     [0x2F] = NOP_3B4C_65c02,
     [0x30] = BMI,
     [0x31] = AND_IND_Y,
-    [0x32] = AND_ZP_65c02,
+    [0x32] = AND_IND_ZP_65c02,
     [0x33] = NOP,
     [0x34] = BIT_ZP_X_65c02,
     [0x35] = AND_ZP_X,
     [0x36] = ROL_ZP_X_65c02,
-    [0x37] = NOP_2B3C_65c02,
+    [0x37] = NOP_2B4C_65c02,
     [0x38] = SEC,
     [0x39] = AND_ABS_Y,
     [0x3A] = DEA_65c02,
@@ -779,42 +791,42 @@ opcode_steps *opcodes_65c02[256] = {
     [0x41] = EOR_IND_X,
     [0x42] = NOP_2B5C_65c02,
     [0x43] = NOP,
-    [0x44] = NOP_2B3C_65c02,
+    [0x44] = NOP_2B4C_65c02,
     [0x45] = EOR_ZP,
-    [0x46] = LSR_ZP,
-    [0x47] = NOP_2B3C_65c02,
+    [0x46] = LSR_ZP_65c02,
+    [0x47] = NOP_2B4C_65c02,
     [0x48] = PHA,
     [0x49] = EOR_IMM,
     [0x4A] = LSR_A,
     [0x4B] = NOP,
     [0x4C] = JMP_ABS,
     [0x4D] = EOR_ABS,
-    [0x4E] = LSR_ABS,
+    [0x4E] = LSR_ABS_65c02,
     [0x4F] = NOP_3B4C_65c02,
     [0x50] = BVC,
     [0x51] = EOR_IND_Y,
-    [0x52] = EOR_ZP,
+    [0x52] = EOR_IND_ZP_65c02,
     [0x53] = NOP,
-    [0x54] = NOP,
+    [0x54] = NOP_2B4C_65c02,
     [0x55] = EOR_ZP_X,
-    [0x56] = LSR_ZP_X,
-    [0x57] = NOP_2B3C_65c02,
+    [0x56] = LSR_ZP_X_65c02,
+    [0x57] = NOP_2B4C_65c02,
     [0x58] = CLI,
     [0x59] = EOR_ABS_Y,
     [0x5A] = PHY_65c02,
     [0x5B] = NOP,
-    [0x5C] = NOP,
+    [0x5C] = NOP_3B4C_65c02,
     [0x5D] = EOR_ABS_X,
-    [0x5E] = LSR_ABS_X,
+    [0x5E] = LSR_ABS_X_65c02,
     [0x5F] = NOP_3B4C_65c02,
     [0x60] = RTS,
-    [0x61] = ADC_IND_X,
+    [0x61] = ADC_IND_X_65c02,
     [0x62] = NOP,
     [0x63] = NOP,
     [0x64] = STZ_ZP_65c02,
     [0x65] = ADC_ZP,
     [0x66] = ROR_ZP,
-    [0x67] = NOP_2B3C_65c02,
+    [0x67] = NOP_2B4C_65c02,
     [0x68] = PLA,
     [0x69] = ADC_IMM,
     [0x6A] = ROR_A,
@@ -825,12 +837,12 @@ opcode_steps *opcodes_65c02[256] = {
     [0x6F] = NOP_3B4C_65c02,
     [0x70] = BVS,
     [0x71] = ADC_IND_Y,
-    [0x72] = ADC_IND,
+    [0x72] = ADC_IND_ZP,
     [0x73] = NOP,
     [0x74] = STZ_ZP_X_65c02,
     [0x75] = ADC_ZP_X,
     [0x76] = ROR_ZP_X,
-    [0x77] = NOP_2B3C_65c02,
+    [0x77] = NOP_2B4C_65c02,
     [0x78] = SEI,
     [0x79] = ADC_ABS_Y,
     [0x7A] = PLY_65c02,
@@ -846,7 +858,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x84] = STY_ZP,
     [0x85] = STA_ZP,
     [0x86] = STX_ZP,
-    [0x87] = NOP_2B3C_65c02,
+    [0x87] = NOP_2B4C_65c02,
     [0x88] = DEY,
     [0x89] = BIT_IMM_65c02,
     [0x8A] = TXA,
@@ -862,7 +874,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0x94] = STY_ZP_X,
     [0x95] = STA_ZP_X,
     [0x96] = STX_ZP_Y,
-    [0x97] = NOP_2B3C_65c02,
+    [0x97] = NOP_2B4C_65c02,
     [0x98] = TYA,
     [0x99] = STA_ABS_Y,
     [0x9A] = TXS,
@@ -878,7 +890,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xA4] = LDY_ZP,
     [0xA5] = LDA_ZP,
     [0xA6] = LDX_ZP,
-    [0xA7] = NOP_2B3C_65c02,
+    [0xA7] = NOP_2B4C_65c02,
     [0xA8] = TAY,
     [0xA9] = LDA_IMM,
     [0xAA] = TAX,
@@ -894,7 +906,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xB4] = LDY_ZP_X,
     [0xB5] = LDA_ZP_X,
     [0xB6] = LDX_ZP_Y,
-    [0xB7] = NOP_2B3C_65c02,
+    [0xB7] = NOP_2B4C_65c02,
     [0xB8] = CLV,
     [0xB9] = LDA_ABS_Y,
     [0xBA] = TSX,
@@ -910,7 +922,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xC4] = CPY_ZP,
     [0xC5] = CMP_ZP,
     [0xC6] = DEC_ZP,
-    [0xC7] = NOP_2B3C_65c02,
+    [0xC7] = NOP_2B4C_65c02,
     [0xC8] = INY,
     [0xC9] = CMP_IMM,
     [0xCA] = DEX,
@@ -926,7 +938,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xD4] = NOP,
     [0xD5] = CMP_ZP_X,
     [0xD6] = DEC_ZP_X,
-    [0xD7] = NOP_2B3C_65c02,
+    [0xD7] = NOP_2B4C_65c02,
     [0xD8] = CLD,
     [0xD9] = CMP_ABS_Y,
     [0xDA] = PHX_65c02,
@@ -942,7 +954,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xE4] = CPX_ZP,
     [0xE5] = SBC_ZP,
     [0xE6] = INC_ZP,
-    [0xE7] = NOP_2B3C_65c02,
+    [0xE7] = NOP_2B4C_65c02,
     [0xE8] = INX,
     [0xE9] = SBC_IMM,
     [0xEA] = NOP,
@@ -958,7 +970,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xF4] = NOP,
     [0xF5] = SBC_ZP_X,
     [0xF6] = INC_ZP_X,
-    [0xF7] = NOP_2B3C_65c02,
+    [0xF7] = NOP_2B4C_65c02,
     [0xF8] = SED,
     [0xF9] = SBC_ABS_Y,
     [0xFA] = PLX_65c02,
@@ -1977,6 +1989,18 @@ void a2brk_65c02(MACHINE *m) {
     m->cpu.instruction_cycle = -1;
 }
 
+void adc_a16_65c02(MACHINE *m) {
+    m->cpu.scratch_lo = read_from_memory(m, m->cpu.address_16);
+    if(!m->cpu.D || m->cpu.page_fault) {
+        add_value_to_accumulator(m, m->cpu.scratch_lo);
+        m->cpu.page_fault = 0;
+        m->cpu.instruction_cycle = -1;
+    } else {
+        m->cpu.page_fault = 1;
+        m->cpu.N = 0;
+    }
+}
+
 void bit_a16_65c02(MACHINE *m) {
     if(!check_page_fault(m, m->cpu.X)) {
         m->cpu.instruction_cycle = -1;
@@ -2014,3 +2038,25 @@ void nop3b4c_65c02(MACHINE *m) {
     read_from_memory(m, m->cpu.pc-1);
     m->cpu.instruction_cycle = -1;
 }
+
+
+void phx_65c02(MACHINE *m) {
+    push(m, m->cpu.X);
+    m->cpu.instruction_cycle = -1;
+}
+
+void phy_65c02(MACHINE *m) {
+    push(m, m->cpu.Y);
+    m->cpu.instruction_cycle = -1;
+}
+
+void plx_65c02(MACHINE *m) {
+    set_register_to_value(m, &m->cpu.X, pull(m));
+    m->cpu.instruction_cycle = -1;
+}
+
+void ply_65c02(MACHINE *m) {
+    set_register_to_value(m, &m->cpu.Y, pull(m));
+    m->cpu.instruction_cycle = -1;
+}
+
