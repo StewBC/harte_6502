@@ -215,6 +215,7 @@ void a2brk_65c02(MACHINE *m);
 void adc_a16_65c02(MACHINE *m);
 void bit_a16_65c02(MACHINE *m);
 void bra_65c02(MACHINE * m);
+void d_fix_65c02(MACHINE * m);
 void dea_65c02(MACHINE * m);
 void ina_65c02(MACHINE * m);
 void nop2b_65c02(MACHINE *m);
@@ -224,6 +225,7 @@ void phx_65c02(MACHINE *m);
 void phy_65c02(MACHINE *m);
 void plx_65c02(MACHINE *m);
 void ply_65c02(MACHINE *m);
+void stz_a16_65c02(MACHINE *m);
 
 // All cycle stages for all instructions
 opcode_steps ADC_IMM[]   = {adc_imm};                               // 2
@@ -414,9 +416,22 @@ opcode_steps TXS[]       = {txs};                                   // 2
 opcode_steps TYA[]       = {tya};                                   // 2
 
 // 65c02 opcode steps
+// opcode_steps ADC_IMM[]   = {adc_imm};                               // 2
+opcode_steps ADC_ZP_65c02[]    = {al_read_pc, adc_a16_65c02, d_fix_65c02};                   // 3
+// opcode_steps ADC_ZP_X[]  = {al_read_pc, read_a16_ind_x, adc_a16};   // 4
+// opcode_steps ADC_ABS[]   = {al_read_pc, ah_read_pc, adc_a16};       // 4
+// opcode_steps ADC_ABS_X[] = {al_read_pc, ah_read_pc, adc_abs_x};     // 4*
+// opcode_steps ADC_ABS_Y[] = {al_read_pc, ah_read_pc, adc_abs_y};     // 4*
+// opcode_steps ADC_IND_X[] = {al_read_pc, read_a16_ind_x, sl_read_a16, ah_read_a16_sl2al, adc_a16}; // 6
+// opcode_steps ADC_IND_Y[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, adc_abs_y}; // 5*
+
+
 opcode_steps ADC_IND_ZP[]        = {nop}; // 5 sqw
 opcode_steps AND_IND_ZP_65c02[]  = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, and_abs}; // 5
-opcode_steps ADC_IND_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, ah_read_a16_sl2al, adc_a16_65c02}; // 6
+opcode_steps ADC_IND_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, ah_read_a16_sl2al, adc_a16_65c02, d_fix_65c02}; // 6
+
+
+
 // opcode_steps AND_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, and_a16}; // 6
 opcode_steps ASL_A_65c02[]      = {asl_a};                                 // 2
 opcode_steps ASL_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, asl_a16}; // 5
@@ -452,10 +467,10 @@ opcode_steps ROL_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, rol_a16
 opcode_steps ROL_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, rol_a16}; // 6
 opcode_steps ROL_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, rol_a16}; // 6
 opcode_steps ROL_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, sl_read_xpf_a16, sl_read_x_a16, rol_a16}; // 7
-opcode_steps STZ_ABS_65c02[]    = {nop};       // 4 SQW
-opcode_steps STZ_ABS_X_65c02[]  = {nop};       // 5 SQW
-opcode_steps STZ_ZP_65c02[]     = {nop}; // 3 SQW
-opcode_steps STZ_ZP_X_65c02[]   = {nop}; // 4 SQW
+opcode_steps STZ_ABS_65c02[]    = {al_read_pc, ah_read_pc, stz_a16_65c02};       // 4 SQW
+opcode_steps STZ_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, sl_read_xpf_a16, stz_a16_65c02};       // 5 SQW
+opcode_steps STZ_ZP_65c02[]     = {al_read_pc, stz_a16_65c02}; // 3 SQW
+opcode_steps STZ_ZP_X_65c02[]   = {al_read_pc, sl_read_xpf_a16, stz_a16_65c02}; // 4 SQW
 
 // All cycles not implemented refer to the UNDEFINED stage, which is just an empty cycle for now
 opcode_steps UNDEFINED[] = {empty_cycle};
@@ -821,10 +836,10 @@ opcode_steps *opcodes_65c02[256] = {
     [0x5F] = NOP_3B4C_65c02,
     [0x60] = RTS,
     [0x61] = ADC_IND_X_65c02,
-    [0x62] = NOP,
+    [0x62] = NOP_2B2C_65c02,
     [0x63] = NOP,
     [0x64] = STZ_ZP_65c02,
-    [0x65] = ADC_ZP,
+    [0x65] = ADC_ZP_65c02,
     [0x66] = ROR_ZP,
     [0x67] = NOP_2B4C_65c02,
     [0x68] = PLA,
@@ -1091,6 +1106,9 @@ void add_value_to_accumulator(MACHINE *m, uint8_t value) {
             m->cpu.C = 1;
         }
         m->cpu.A = (m->cpu.scratch_hi << 4) | (m->cpu.scratch_lo & 0x0F);
+        // if(opcodes == opcodes_65c02) {
+        //     m->cpu.N = m->cpu.A & 0x80 ? 1 : 0;
+        // }
     }
 }
 
@@ -1991,13 +2009,11 @@ void a2brk_65c02(MACHINE *m) {
 
 void adc_a16_65c02(MACHINE *m) {
     m->cpu.scratch_lo = read_from_memory(m, m->cpu.address_16);
-    if(!m->cpu.D || m->cpu.page_fault) {
-        add_value_to_accumulator(m, m->cpu.scratch_lo);
-        m->cpu.page_fault = 0;
+    add_value_to_accumulator(m, m->cpu.scratch_lo);
+    if(!m->cpu.D) {
         m->cpu.instruction_cycle = -1;
     } else {
-        m->cpu.page_fault = 1;
-        m->cpu.N = 0;
+        m->cpu.instruction_cycle++;
     }
 }
 
@@ -2008,6 +2024,11 @@ void bit_a16_65c02(MACHINE *m) {
         m->cpu.flags &= 0b00111111;
         m->cpu.flags |= (m->cpu.scratch_lo & 0b11000000);
     }
+}
+
+void d_fix_65c02(MACHINE * m) {
+    m->cpu.N = m->cpu.A & 0x80 ? 1 : 0;
+    m->cpu.instruction_cycle = -1;
 }
 
 void dea_65c02(MACHINE * m) {
@@ -2060,3 +2081,6 @@ void ply_65c02(MACHINE *m) {
     m->cpu.instruction_cycle = -1;
 }
 
+void stz_a16_65c02(MACHINE *m) {
+    write_to_memory(m, m->cpu.address_16, 0);
+}
