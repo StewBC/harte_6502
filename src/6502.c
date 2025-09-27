@@ -213,11 +213,15 @@ void tya(MACHINE * m);           /* 98 */
 // 65c02 Specific stage instructions
 void a2brk_65c02(MACHINE *m);
 void adc_a16_65c02(MACHINE *m);
+void adc_abs_y_65c02(MACHINE *m);
+void adc_imm_65c02(MACHINE *m);
+void sh_read_a16_65c02(MACHINE *m);
 void bit_a16_65c02(MACHINE *m);
 void bra_65c02(MACHINE * m);
 void d_fix_65c02(MACHINE * m);
 void dea_65c02(MACHINE * m);
 void ina_65c02(MACHINE * m);
+void jmp_ind_65c02(MACHINE * m);
 void nop2b_65c02(MACHINE *m);
 void nop2b3c_65c02(MACHINE *m);
 void nop3b4c_65c02(MACHINE *m);
@@ -416,17 +420,17 @@ opcode_steps TXS[]       = {txs};                                   // 2
 opcode_steps TYA[]       = {tya};                                   // 2
 
 // 65c02 opcode steps
-// opcode_steps ADC_IMM[]   = {adc_imm};                               // 2
+opcode_steps ADC_IMM_65c02[]   = {adc_imm_65c02, d_fix_65c02};                               // 2
 opcode_steps ADC_ZP_65c02[]    = {al_read_pc, adc_a16_65c02, d_fix_65c02};                   // 3
 // opcode_steps ADC_ZP_X[]  = {al_read_pc, read_a16_ind_x, adc_a16};   // 4
-// opcode_steps ADC_ABS[]   = {al_read_pc, ah_read_pc, adc_a16};       // 4
+opcode_steps ADC_ABS_65c02[]   = {al_read_pc, ah_read_pc, adc_a16_65c02, d_fix_65c02};       // 4
 // opcode_steps ADC_ABS_X[] = {al_read_pc, ah_read_pc, adc_abs_x};     // 4*
 // opcode_steps ADC_ABS_Y[] = {al_read_pc, ah_read_pc, adc_abs_y};     // 4*
 // opcode_steps ADC_IND_X[] = {al_read_pc, read_a16_ind_x, sl_read_a16, ah_read_a16_sl2al, adc_a16}; // 6
-// opcode_steps ADC_IND_Y[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, adc_abs_y}; // 5*
+opcode_steps ADC_IND_Y_65c02[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, adc_abs_y_65c02, d_fix_65c02}; // 5*
 
 
-opcode_steps ADC_IND_ZP[]        = {nop}; // 5 sqw
+opcode_steps ADC_IND_ZP_65c02[]        = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, adc_a16_65c02, d_fix_65c02}; // 5 sqw
 opcode_steps AND_IND_ZP_65c02[]  = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, and_abs}; // 5
 opcode_steps ADC_IND_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, ah_read_a16_sl2al, adc_a16_65c02, d_fix_65c02}; // 6
 
@@ -446,7 +450,7 @@ opcode_steps BRK_65c02[]        = {al_read_pc, pc_hi_to_stack, pc_lo_to_stack, p
 opcode_steps DEA_65c02[]        = {dea_65c02};                                   // 2 SQW
 opcode_steps EOR_IND_ZP_65c02[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, eor_a16}; // 5
 opcode_steps INA_65c02[]        = {ina_65c02};                                   // 2 SQW
-opcode_steps JMP_IND_X_65c02[]  = {nop}; // 6 SQW
+opcode_steps JMP_IND_X_65c02[]  = {al_read_pc, ah_read_pc, sl_read_a16, sh_read_a16_65c02, jmp_ind_65c02}; // 5opcode_steps JMP_IND[]   = 
 opcode_steps LSR_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, lsr_a16}; // 5
 opcode_steps LSR_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, lsr_a16}; // 6
 opcode_steps LSR_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, lsr_a16}; // 6
@@ -467,6 +471,10 @@ opcode_steps ROL_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, rol_a16
 opcode_steps ROL_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, rol_a16}; // 6
 opcode_steps ROL_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, rol_a16}; // 6
 opcode_steps ROL_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, sl_read_xpf_a16, sl_read_x_a16, rol_a16}; // 7
+opcode_steps ROR_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, ror_a16}; // 5
+opcode_steps ROR_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, ror_a16}; // 6
+opcode_steps ROR_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, ror_a16}; // 6
+opcode_steps ROR_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, sl_read_xpf_a16, sl_read_x_a16, sl_read_a16, ror_a16}; // 7
 opcode_steps STZ_ABS_65c02[]    = {al_read_pc, ah_read_pc, stz_a16_65c02};       // 4 SQW
 opcode_steps STZ_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, sl_read_xpf_a16, stz_a16_65c02};       // 5 SQW
 opcode_steps STZ_ZP_65c02[]     = {al_read_pc, stz_a16_65c02}; // 3 SQW
@@ -840,19 +848,19 @@ opcode_steps *opcodes_65c02[256] = {
     [0x63] = NOP,
     [0x64] = STZ_ZP_65c02,
     [0x65] = ADC_ZP_65c02,
-    [0x66] = ROR_ZP,
+    [0x66] = ROR_ZP_65c02,
     [0x67] = NOP_2B4C_65c02,
     [0x68] = PLA,
-    [0x69] = ADC_IMM,
+    [0x69] = ADC_IMM_65c02,
     [0x6A] = ROR_A,
     [0x6B] = NOP,
-    [0x6C] = JMP_IND,
-    [0x6D] = ADC_ABS,
-    [0x6E] = ROR_ABS,
+    [0x6C] = JMP_IND_X_65c02,
+    [0x6D] = ADC_ABS_65c02,
+    [0x6E] = ROR_ABS_65c02,
     [0x6F] = NOP_3B4C_65c02,
     [0x70] = BVS,
-    [0x71] = ADC_IND_Y,
-    [0x72] = ADC_IND_ZP,
+    [0x71] = ADC_IND_Y_65c02,
+    [0x72] = ADC_IND_ZP_65c02,
     [0x73] = NOP,
     [0x74] = STZ_ZP_X_65c02,
     [0x75] = ADC_ZP_X,
@@ -1106,9 +1114,6 @@ void add_value_to_accumulator(MACHINE *m, uint8_t value) {
             m->cpu.C = 1;
         }
         m->cpu.A = (m->cpu.scratch_hi << 4) | (m->cpu.scratch_lo & 0x0F);
-        // if(opcodes == opcodes_65c02) {
-        //     m->cpu.N = m->cpu.A & 0x80 ? 1 : 0;
-        // }
     }
 }
 
@@ -2017,6 +2022,35 @@ void adc_a16_65c02(MACHINE *m) {
     }
 }
 
+void adc_abs_y_65c02(MACHINE *m) {
+    if(!check_page_fault(m, m->cpu.Y)) {
+        add_value_to_accumulator(m, m->cpu.scratch_lo);
+        if(!m->cpu.D) {
+            m->cpu.instruction_cycle = -1;
+        } else {
+            m->cpu.instruction_cycle++;
+        }
+    }
+}
+
+void adc_imm_65c02(MACHINE *m) {
+    m->cpu.scratch_lo = read_from_memory(m, m->cpu.pc);
+    add_value_to_accumulator(m, m->cpu.scratch_lo);
+    m->cpu.pc++;
+    if(!m->cpu.D) {
+        m->cpu.instruction_cycle = -1;
+    } else {
+        m->cpu.instruction_cycle++;
+        m->cpu.address_16 = 0x56;
+    }
+}
+
+void sh_read_a16_65c02(MACHINE *m) {
+    m->cpu.address_lo++;
+    m->cpu.scratch_hi = read_from_memory(m, m->cpu.address_16);
+    m->cpu.instruction_cycle++;
+}
+
 void bit_a16_65c02(MACHINE *m) {
     if(!check_page_fault(m, m->cpu.X)) {
         m->cpu.instruction_cycle = -1;
@@ -2027,7 +2061,8 @@ void bit_a16_65c02(MACHINE *m) {
 }
 
 void d_fix_65c02(MACHINE * m) {
-    m->cpu.N = m->cpu.A & 0x80 ? 1 : 0;
+    read_from_memory(m, m->cpu.address_16);
+    set_register_to_value(m, &m->cpu.A, m->cpu.A);
     m->cpu.instruction_cycle = -1;
 }
 
@@ -2040,6 +2075,15 @@ void dea_65c02(MACHINE * m) {
 void ina_65c02(MACHINE * m) {
     read_from_memory(m, m->cpu.pc);
     set_register_to_value(m, &m->cpu.A, m->cpu.A + 1);
+    m->cpu.instruction_cycle = -1;
+}
+
+void jmp_ind_65c02(MACHINE *m) {
+    if(!m->cpu.address_lo) {
+        m->cpu.address_hi++;
+    }
+    m->cpu.scratch_hi = read_from_memory(m, m->cpu.address_16);
+    m->cpu.pc = m->cpu.scratch_16;
     m->cpu.instruction_cycle = -1;
 }
 
