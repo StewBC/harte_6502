@@ -238,6 +238,8 @@ void phx_65c02(MACHINE *m);
 void phy_65c02(MACHINE *m);
 void plx_65c02(MACHINE *m);
 void ply_65c02(MACHINE *m);
+void sbc_a16_65c02(MACHINE *m);
+void sbc_imm_65c02(MACHINE *m);
 void stz_a16_65c02(MACHINE *m);
 void stz_a16_X_65c02(MACHINE *m);
 
@@ -458,10 +460,20 @@ opcode_steps BIT_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, bit_a16};        
 opcode_steps BRA_65c02[]        = {bra_65c02, branch};                           // 3 SQW
 opcode_steps BRK_65c02[]        = {al_read_pc, pc_hi_to_stack, pc_lo_to_stack, p_to_stack, brk_pc, a2brk_65c02}; // 7
 opcode_steps DEA_65c02[]        = {dea_65c02};                                   // 2 SQW
+opcode_steps CMP_IND_65c02[]    = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, cmp_a16}; // 6
+opcode_steps DEC_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, dec_a16}; // 6
+opcode_steps DEC_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, opc_read_xpf, sl_read_a16, sl_read_a16, dec_a16}; // 7
+opcode_steps DEC_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, dec_a16}; // 5
+opcode_steps DEC_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, dec_a16}; // 6
 opcode_steps EOR_IND_ZP_65c02[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, eor_a16}; // 5
 opcode_steps INA_65c02[]        = {ina_65c02};                                   // 2 SQW
+opcode_steps INC_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, inc_a16}; // 6
+opcode_steps INC_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, opc_read_xpf, sl_read_a16, sl_read_a16, inc_a16}; // 7
+opcode_steps INC_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, inc_a16}; // 5
+opcode_steps INC_ZP_X_65c02[]  = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, inc_a16}; // 6
 opcode_steps JMP_IND_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sh_read_a16_65c02, jmp_ind_65c02}; // 5opcode_steps JMP_IND[]   = 
 opcode_steps JMP_IND_X_65c02[]  = {al_read_pc, ah_read_pc, opc_read_xpf2, sl_read_a16, jmp_ind_x_65c02}; // 5opcode_steps JMP_IND[]   = 
+opcode_steps LDA_IND_65c02[]    = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, lda_a16}; // 5*
 opcode_steps LSR_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, lsr_a16}; // 5
 opcode_steps LSR_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, lsr_a16}; // 6
 opcode_steps LSR_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, lsr_a16}; // 6
@@ -486,6 +498,8 @@ opcode_steps ROR_ZP_65c02[]     = {al_read_pc, sl_read_a16, sl_read_a16, ror_a16
 opcode_steps ROR_ZP_X_65c02[]   = {al_read_pc, read_a16_ind_x, sl_read_a16, sl_read_a16, ror_a16}; // 6
 opcode_steps ROR_ABS_65c02[]    = {al_read_pc, ah_read_pc, sl_read_a16, sl_read_a16, ror_a16}; // 6
 opcode_steps ROR_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, sl_read_xpf_a16, sl_read_a16, ror_a16}; // 7
+opcode_steps SBC_IND_ZP_65c02[] = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, sbc_a16_65c02, d_fix_65c02}; // 5 sqw
+opcode_steps SBC_IND_X_65c02[]  = {al_read_pc, read_a16_ind_x, sl_read_a16, ah_read_a16_sl2al, sbc_a16_65c02, d_fix_65c02}; // 6
 opcode_steps STA_ABS_X_65c02[]  = {al_read_pc, ah_read_pc, opc_read_xpf, sta_a16};       // 5 SQW
 opcode_steps STA_ABS_Y_65c02[]  = {al_read_pc, ah_read_pc, opc_read_ypf, sta_a16};       // 5 SQW
 opcode_steps STA_IND_65c02[]    = {al_read_pc, sl_read_a16, ah_read_a16_sl2al, sta_a16}; // 6
@@ -939,7 +953,7 @@ opcode_steps *opcodes_65c02[256] = {
     [0xAF] = NOP_3B4C_65c02,
     [0xB0] = BCS,
     [0xB1] = LDA_IND_Y,
-    [0xB2] = LDA_ZP,
+    [0xB2] = LDA_IND_65c02,
     [0xB3] = NOP,
     [0xB4] = LDY_ZP_X,
     [0xB5] = LDA_ZP_X,
@@ -955,11 +969,11 @@ opcode_steps *opcodes_65c02[256] = {
     [0xBF] = NOP_3B4C_65c02,
     [0xC0] = CPY_IMM,
     [0xC1] = CMP_IND_X,
-    [0xC2] = NOP,
+    [0xC2] = NOP_2B2C_65c02,
     [0xC3] = NOP,
     [0xC4] = CPY_ZP,
     [0xC5] = CMP_ZP,
-    [0xC6] = DEC_ZP,
+    [0xC6] = DEC_ZP_65c02,
     [0xC7] = NOP_2B4C_65c02,
     [0xC8] = INY,
     [0xC9] = CMP_IMM,
@@ -967,31 +981,31 @@ opcode_steps *opcodes_65c02[256] = {
     [0xCB] = NOP,
     [0xCC] = CPY_ABS,
     [0xCD] = CMP_ABS,
-    [0xCE] = DEC_ABS,
+    [0xCE] = DEC_ABS_65c02,
     [0xCF] = NOP_3B4C_65c02,
     [0xD0] = BNE,
     [0xD1] = CMP_IND_Y,
-    [0xD2] = CMP_ZP,
+    [0xD2] = CMP_IND_65c02,
     [0xD3] = NOP,
-    [0xD4] = NOP,
+    [0xD4] = NOP_2B4C_65c02,
     [0xD5] = CMP_ZP_X,
-    [0xD6] = DEC_ZP_X,
+    [0xD6] = DEC_ZP_X_65c02,
     [0xD7] = NOP_2B4C_65c02,
     [0xD8] = CLD,
     [0xD9] = CMP_ABS_Y,
     [0xDA] = PHX_65c02,
-    [0xDB] = NOP,
-    [0xDC] = NOP,
+    [0xDB] = NOP_2B4C_65c02,
+    [0xDC] = NOP_3B4C_65c02,
     [0xDD] = CMP_ABS_X,
-    [0xDE] = DEC_ABS_X,
+    [0xDE] = DEC_ABS_X_65c02,
     [0xDF] = NOP_3B4C_65c02,
     [0xE0] = CPX_IMM,
-    [0xE1] = SBC_IND_X,
-    [0xE2] = NOP,
+    [0xE1] = SBC_IND_X_65c02,
+    [0xE2] = NOP_2B2C_65c02,
     [0xE3] = NOP,
     [0xE4] = CPX_ZP,
     [0xE5] = SBC_ZP,
-    [0xE6] = INC_ZP,
+    [0xE6] = INC_ZP_65c02,
     [0xE7] = NOP_2B4C_65c02,
     [0xE8] = INX,
     [0xE9] = SBC_IMM,
@@ -999,23 +1013,23 @@ opcode_steps *opcodes_65c02[256] = {
     [0xEB] = NOP,
     [0xEC] = CPX_ABS,
     [0xED] = SBC_ABS,
-    [0xEE] = INC_ABS,
+    [0xEE] = INC_ABS_65c02,
     [0xEF] = NOP_3B4C_65c02,
     [0xF0] = BEQ,
     [0xF1] = SBC_IND_Y,
-    [0xF2] = SBC_ZP,
+    [0xF2] = SBC_IND_ZP_65c02,
     [0xF3] = NOP,
-    [0xF4] = NOP,
+    [0xF4] = NOP_2B4C_65c02,
     [0xF5] = SBC_ZP_X,
-    [0xF6] = INC_ZP_X,
+    [0xF6] = INC_ZP_X_65c02,
     [0xF7] = NOP_2B4C_65c02,
     [0xF8] = SED,
     [0xF9] = SBC_ABS_Y,
     [0xFA] = PLX_65c02,
     [0xFB] = NOP,
-    [0xFC] = NOP,
+    [0xFC] = NOP_3B4C_65c02,
     [0xFD] = SBC_ABS_X,
-    [0xFE] = INC_ABS_X,
+    [0xFE] = INC_ABS_X_65c02,
     [0xFF] = NOP_3B4C_65c02,
 };
 
@@ -1192,16 +1206,25 @@ void subtract_value_from_accumulator(MACHINE *m, uint8_t value) {
     set_register_to_value(m, &m->cpu.A, m->cpu.scratch_lo);
     m->cpu.V = ((a ^ value) & (a ^ m->cpu.A) & 0x80) != 0 ? 1 : 0;
     if(m->cpu.D) {
-        m->cpu.address_lo = (a & 0x0F) - (value & 0x0F) - m->cpu.C;
-        m->cpu.address_hi = (a >> 4) - (value >> 4);
-        if (m->cpu.address_lo & 0x10) {
-            m->cpu.address_lo -= 6;
-            m->cpu.address_hi--;
+        // m->cpu.address_lo = (a & 0x0F) - (value & 0x0F) - m->cpu.C;
+        // m->cpu.address_hi = (a >> 4) - (value >> 4);
+        // if (m->cpu.address_lo & 0x10) {
+        //     m->cpu.address_lo -= 6;
+        //     m->cpu.address_hi--;
+        // }
+        // if (m->cpu.address_hi & 0xF0) {
+        //     m->cpu.address_hi -= 6;
+        // }
+        uint8_t lo = (a & 0x0F) - (value & 0x0F) - m->cpu.C;
+        uint8_t hi = (a >> 4) - (value >> 4);
+        if (lo & 0x10) {
+            lo -= 6;
+            hi--;
         }
-        if (m->cpu.address_hi & 0xF0) {
-            m->cpu.address_hi -= 6;
+        if (hi & 0xF0) {
+            hi -= 6;
         }
-        m->cpu.A = (m->cpu.address_hi << 4) | (m->cpu.address_lo & 0x0F);
+        m->cpu.A = (hi << 4) | (lo & 0x0F);
     }
     m->cpu.C = m->cpu.scratch_16 < 0x100 ? 1 : 0;
 }
@@ -2190,6 +2213,28 @@ void plx_65c02(MACHINE *m) {
 void ply_65c02(MACHINE *m) {
     set_register_to_value(m, &m->cpu.Y, pull(m));
     m->cpu.instruction_cycle = -1;
+}
+
+void sbc_a16_65c02(MACHINE *m) {
+    m->cpu.scratch_lo = read_from_memory(m, m->cpu.address_16);
+    subtract_value_from_accumulator(m, m->cpu.scratch_lo);
+    if(!m->cpu.D) {
+        m->cpu.instruction_cycle = -1;
+    } else {
+        m->cpu.instruction_cycle++;
+    }
+}
+
+void sbc_imm_65c02(MACHINE *m) {
+    m->cpu.scratch_lo = read_from_memory(m, m->cpu.pc);
+    subtract_value_from_accumulator(m, m->cpu.scratch_lo);
+    m->cpu.pc++;
+    if(!m->cpu.D) {
+        m->cpu.instruction_cycle = -1;
+    } else {
+        m->cpu.instruction_cycle++;
+        m->cpu.address_16 = 0x56;
+    }
 }
 
 void sta_abs_y_65c02(MACHINE *m) {
