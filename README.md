@@ -85,7 +85,13 @@ $url  = "https://raw.githubusercontent.com/SingleStepTests/65x02/main/synertek65
 ## How does this emulation fare?  
 ```
 harte_6502> .\build\6502.exe 65x02/6502/*.json
-TEST ff: Ran: 1510000 Passed: 1508482 Failed:  1518 Skipped: 1050000 Percent:   99.94%
+...
+TEST RESULTS:
+Ran    : 1510000
+Passed : 1508482
+Failed : 1518
+Skipped: 1050000
+Percent: 99.94%
 ```
 All 1518 tests that it fails are in `adc`, in `BCD` mode, where my emulator differs only in terms of the `N` and sometimes also the `V` flag results.  I also think, but I didn't carefully verify, that the discrepancy between my results and the tests are when `adc` is not given valid `BCD` values'.  Furthermore, I have been told that the actual 6502 in the Apple II, for example, will also give results that differ, in that aspect, from the tests.  So, at this point, I am happy with the performance of my emulator.  I have yet to use it for something useful, and if I do and I find issues, I'll come and update this (at least the README ;)  
   
@@ -95,11 +101,11 @@ All 1518 tests that it fails are in `adc`, in `BCD` mode, where my emulator diff
 # Why and what's next?  
 I did this just because I was curious and wanted to try making a 6502 emulator.  
 
-I first, using the V1 core, made a very small Apple II emulator that can run the Manic Miner I made for the Apple II.  I call it the Manic Miner Machine.  I used this 6502 code more-or-less as-is (I made MACHINE be APPLE).  The Speaker audio on the Manic Miner Machine emulator is horrible but otherwise it works great, so I can confirm this CPU emulation works well enough in a real application.  You can see more about that here: [Manic Miner Machine](https://github.com/StewBC/mminer-apple2/blob/master/src/mmm/README.md)  
+Using the V1 core, I made a very small Apple II emulator that can run the Manic Miner I made for the Apple II.  I call it the Manic Miner Machine.  I used the V1 6502 code as-is.  The Speaker audio on the Manic Miner Machine emulator is horrible but otherwise it works great, so I can confirm this CPU emulation works well enough in a real application.  You can see more about that here: [Manic Miner Machine](https://github.com/StewBC/mminer-apple2/tree/master/src/mmm)  
   
-I then, using that same core, made a more proper Apple II+ emulator.  You can see more about that here: [a2m](https://github.com/StewBC/a2m/blob/master/README.md)
+I then, using that same core, made a more proper Apple II+ emulator.  You can see more about that here: [a2m](https://github.com/StewBC/a2m)
 
-Next up, I hope, will be to make the 65c02 inline core, and then put all of this into [a2m](https://github.com/StewBC/a2m) and extend the emulator to a full Apple //e emulator.   
+Next I want to make the 65c02 inline core, and then put all of this into [a2m](https://github.com/StewBC/a2m) and extend the emulator to a full Apple //e emulator.   
   
 Feel free to contact me at swessels@email.com if you have thoughts or suggestions.  
 
