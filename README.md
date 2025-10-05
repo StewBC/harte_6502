@@ -58,8 +58,30 @@ for i in {0..255}; do
   curl -O $url
 done
 ```
+In Powershell, that would be:  
+```
+for ($i = 0; $i -le 255; $i++) {
+    # Format number as two-digit hex (00..ff)
+    $hex = '{0:x2}' -f $i
+    $file = "$hex.json"
+    $url  = "https://raw.githubusercontent.com/SingleStepTests/65x02/main/6502/v1/$file"
+
+    Write-Host "Downloading $file..."
+    Invoke-WebRequest -Uri $url -OutFile $file
+}
+```
+The URLs for the Synertek 65c02 are:  
+```
+Bash:
+url="https://raw.githubusercontent.com/SingleStepTests/65x02/main/synertek65c02/v1/${hex}.json"
+or
+Powershell:
+$url  = "https://raw.githubusercontent.com/SingleStepTests/65x02/main/synertek65c02/v1/$file"
+```
   
-# How does this emulation fare?  
+# 6502
+  
+## How does this emulation fare?  
 ```
 TEST RESULTS:  
 Ran    : 1510000
@@ -68,8 +90,10 @@ Failed : 1518
 Skipped: 105
 Percent: 99.90%
 ```
-
 All 1518 tests that it fails are in `adc`, in `BCD` mode, where my emulator differs only in terms of the `N` and sometimes also the `V` flag results.  I also think, but I didn't carefully verify, that the discrepancy between my results and the tests are when `adc` is not given valid `BCD` values'.  Furthermore, I have been told that the actual 6502 in the Apple II, for example, will also give results that differ, in that aspect, from the tests.  So, at this point, I am happy with the performance of my emulator.  I have yet to use it for something useful, and if I do and I find issues, I'll come and update this (at least the README ;)  
+  
+# 65c02 - Synertek
+* WIP  
   
 # Why and what's next?  
 I did this just because I was curious and wanted to try making a 6502 emulator.  I might try to write a portion of a system emulator, likely for the Commodore 64, that can run some basic programs without graphics, sound or sprites.  A minimal C64 emulator.<sup>*</sup>

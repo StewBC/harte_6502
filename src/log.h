@@ -5,7 +5,8 @@ enum LOG_CHANNELS {
     CHAN_TEST_INFO = (1<<1),
     CHAN_SUCCESS   = (1<<2),
     CHAN_FAIL      = (1<<3),
-    CHAN_STEP      = (1<<4),
+    CHAN_FILTER    = (1<<4),
+    CHAN_STEP      = (1<<5),
 };
 typedef enum LOG_CHANNELS LOG_CHANNELS;
 

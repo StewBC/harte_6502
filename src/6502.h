@@ -40,6 +40,12 @@ struct PAGES {
 };
 typedef struct PAGES PAGES;
 
+/* CPU Types */
+enum {
+    CPU_6502,
+    CPU_65c02
+};
+
 /* The 6502 internals*/
 struct CPU {
     uint16_t    pc;             // Program counter
@@ -56,7 +62,7 @@ struct CPU {
             uint8_t     V: 1;   // Overflow
             uint8_t     N: 1;   // Negative
         };
-    uint8_t flags;
+        uint8_t flags;
     };
     union {
         struct {
@@ -76,7 +82,7 @@ struct CPU {
         uint8_t page_fault: 1;  // During stages where a page-fault could happen, denotes fault
     };
     uint8_t instruction;        // Current instruction being executed
-    int16_t instruction_cycle;  // Stage (value 0, instruction fetched, is cycle 1 of execution, -1 need instruction)
+    uint32_t class;             // CPU_6502 or CPU_65c02
     uint64_t cycles;            // Total count of cycles the cpu has executed
 } ;
 typedef struct CPU CPU;
@@ -93,8 +99,7 @@ typedef uint8_t (*IO_READ)(MACHINE *m, uint16_t address);
 typedef void (*IO_WRITE)(MACHINE *m, uint16_t address, uint8_t value);
 
 // The emulated machine (computer)
-struct MACHINE
-{
+struct MACHINE {
     CPU         cpu;            // 6502
     PAGES       read_pages;     // Up to 64K of memory currently visible to CPU when reading
     PAGES       write_pages;    // Up to 64K of memory currently visible to CPU when writing
@@ -106,11 +111,6 @@ struct MACHINE
 };
 typedef struct MACHINE MACHINE;
 
-// The 256 possible opcodes
-extern  opcode_steps *opcodes[256];
-// The UNDEFINED step (cycle) is for the unimplemented opcodes
-extern  opcode_steps UNDEFINED[];
-
 // Configure the ram, ROMS and memory setup (what is mapped in)
 uint8_t ram_init(RAM *ram, uint16_t num_ram_banks);
 void    ram_add(RAM *ram, uint8_t ram_bank_num, uint32_t address, uint32_t length, uint8_t *memory);
@@ -119,13 +119,9 @@ void    rom_add(ROMS *roms, uint8_t rom_num, uint32_t address, uint32_t length, 
 uint8_t pages_init(PAGES *pages, uint16_t num_pages);
 void    pages_map(PAGES *pages, uint32_t start_page, uint32_t num_pages, uint8_t *memory);
 
-// Exposed so that HARTE tests can be loaded and checked
-uint8_t read_from_memory(MACHINE *m, uint16_t address);
-void    write_to_memory(MACHINE *m, uint16_t address, uint8_t value);
-
 // 1 time init
 void    cpu_init(CPU *cpu);
 
 // Step the machine a single CPU cycle
-void    machine_step(MACHINE *m);
-
+int machine_run_opcode_6502(MACHINE *m);
+int machine_run_opcode_65c02(MACHINE *m);
