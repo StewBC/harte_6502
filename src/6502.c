@@ -64,7 +64,7 @@ int machine_run_opcode_6502(MACHINE *m) {
         case ASL_A:     { asl_a(m); } break; // 0A
         case UND_0B:    { unimplemented(m); } break; // 0B
         case UND_0C:    { unimplemented(m); } break; // 0C
-        case ORA_abs:   { arw(m); ora_a16(m); } break; // 0D
+        case ORA_abs:   { a(m); ora_a16(m); } break; // 0D
         case ASL_abs:   { arw(m); asl_a16(m); } break; // 0E
         case UND_0F:    { unimplemented(m); } break; // 0F
         case BPL_rel:   { bpl(m); } break; // 10
@@ -95,8 +95,8 @@ int machine_run_opcode_6502(MACHINE *m) {
         case AND_imm:   { and_imm(m); } break; // 29
         case ROL_A:     { rol_a(m); } break; // 2A
         case UND_2B:    { unimplemented(m); } break; // 2B
-        case BIT_abs:   { arw(m); bit_a16(m); } break; // 2C
-        case AND_abs:   { arw(m); and_a16(m); } break; // 2D
+        case BIT_abs:   { a(m); bit_a16(m); } break; // 2C
+        case AND_abs:   { a(m); and_a16(m); } break; // 2D
         case ROL_abs:   { arw(m); rol_a16(m); } break; // 2E
         case UND_2F:    { unimplemented(m); } break; // 2F
         case BMI_rel:   { bmi(m); } break; // 30
@@ -128,7 +128,7 @@ int machine_run_opcode_6502(MACHINE *m) {
         case LSR_A:     { lsr_a(m); } break; // 4A
         case UND_4B:    { unimplemented(m); } break; // 4B
         case JMP_abs:   { a(m); jmp_a16(m); } break; // 4C
-        case EOR_abs:   { arw(m); eor_a16(m); } break; // 4D
+        case EOR_abs:   { a(m); eor_a16(m); } break; // 4D
         case LSR_abs:   { arw(m); lsr_a16(m); } break; // 4E
         case UND_4F:    { unimplemented(m); } break; // 4F
         case BVC_rel:   { bvc(m); } break; // 50
@@ -160,7 +160,7 @@ int machine_run_opcode_6502(MACHINE *m) {
         case ROR_A:     { ror_a(m); } break; // 6A
         case UND_6B:    { unimplemented(m); } break; // 6B
         case JMP_ind:   { ar(m); jmp_ind(m); } break; // 6C
-        case ADC_abs:   { arw(m); adc_a16(m); } break; // 6D
+        case ADC_abs:   { a(m); adc_a16(m); } break; // 6D
         case ROR_abs:   { arw(m); ror_a16(m); } break; // 6E
         case UND_6F:    { unimplemented(m); } break; // 6F
         case BVS_rel:   { bvs(m); } break; // 70
@@ -191,16 +191,16 @@ int machine_run_opcode_6502(MACHINE *m) {
         case UND_3D:    { unimplemented(m); } break; // 89
         case TXA:       { txa(m); } break; // 8A
         case UND_8B:    { unimplemented(m); } break; // 8B
-        case STY_abs:   { arw(m); sty_a16(m); } break; // 8C
-        case STA_abs:   { arw(m); sta_a16(m); } break; // 8D
-        case STX_abs:   { arw(m); stx_a16(m); } break; // 8E
+        case STY_abs:   { a(m); sty_a16(m); } break; // 8C
+        case STA_abs:   { a(m); sta_a16(m); } break; // 8D
+        case STX_abs:   { a(m); stx_a16(m); } break; // 8E
         case UND_8F:    { unimplemented(m); } break; // 8F
         case BCC_rel:   { bcc(m); } break; // 90
         case STA_ind_Y: { miyr(m); sta_a16(m); } break; // 91
         case UND_92:    { unimplemented(m); } break; // 92
         case UND_93:    { unimplemented(m); } break; // 93
         case STY_zpg_X: { mix(m); sty_a16(m); } break; // 94
-        case STA_zpg_X: { mixrw(m); sta_a16(m); } break; // 95
+        case STA_zpg_X: { mix(m); sta_a16(m); } break; // 95
         case STX_zpg_Y: { mizy(m); stx_a16(m); } break; // 96
         case UND_97:    { unimplemented(m); } break; // 97
         case TYA:       { tya(m); } break; // 98
@@ -208,7 +208,7 @@ int machine_run_opcode_6502(MACHINE *m) {
         case TXS:       { txs(m); } break; // 9A
         case UND_9B:    { unimplemented(m); } break; // 9B
         case UND_9C:    { unimplemented(m); } break; // 9C
-        case STA_abs_X: { aipxrw(m); sta_a16(m); } break; // 9D
+        case STA_abs_X: { aipxr(m); sta_a16(m); } break; // 9D
         case UND_45:    { unimplemented(m); } break; // 9E
         case UND_9F:    { unimplemented(m); } break; // 9F
         case LDY_imm:   { ldy_imm(m); } break; // A0
@@ -223,9 +223,9 @@ int machine_run_opcode_6502(MACHINE *m) {
         case LDA_imm:   { lda_imm(m); } break; // A9
         case TAX:       { tax(m); } break; // AA
         case UND_AB:    { unimplemented(m); } break; // AB
-        case LDY_abs:   { arw(m); ldy_a16(m); } break; // AC
-        case LDA_abs:   { arw(m); lda_a16(m); } break; // AD
-        case LDX_abs:   { arw(m); ldx_a16(m); } break; // AE
+        case LDY_abs:   { a(m); ldy_a16(m); } break; // AC
+        case LDA_abs:   { a(m); lda_a16(m); } break; // AD
+        case LDX_abs:   { a(m); ldx_a16(m); } break; // AE
         case UND_AF:    { unimplemented(m); } break; // AF
         case BCS_rel:   { bcs(m); } break; // B0
         case LDA_ind_Y: { miy(m); lda_a16(m); } break; // B1
@@ -255,8 +255,8 @@ int machine_run_opcode_6502(MACHINE *m) {
         case CMP_imm:   { cmp_imm(m); } break; // C9
         case DEX:       { dex(m); } break; // CA
         case UND_CB:    { unimplemented(m); } break; // CB
-        case CPY_abs:   { arw(m); cpy_a16(m); } break; // CC
-        case CMP_abs:   { arw(m); cmp_a16(m); } break; // CD
+        case CPY_abs:   { a(m); cpy_a16(m); } break; // CC
+        case CMP_abs:   { a(m); cmp_a16(m); } break; // CD
         case DEC_abs:   { arw(m); dec_a16(m); } break; // CE
         case UND_CF:    { unimplemented(m); } break; // CF
         case BNE_rel:   { bne(m); } break; // D0
@@ -287,8 +287,8 @@ int machine_run_opcode_6502(MACHINE *m) {
         case SBC_imm:   { sbc_imm(m); } break; // E9
         case NOP:       { read_pc(m); } break; // EA
         case UND_EB:    { unimplemented(m); } break; // EB
-        case CPX_abs:   { arw(m); cpx_a16(m); } break; // EC
-        case SBC_abs:   { arw(m); sbc_a16(m); } break; // ED
+        case CPX_abs:   { a(m); cpx_a16(m); } break; // EC
+        case SBC_abs:   { a(m); sbc_a16(m); } break; // ED
         case INC_abs:   { arw(m); inc_a16(m); } break; // EE
         case UND_EF:    { unimplemented(m); } break; // EF
         case BEQ_rel:   { beq(m); } break; // F0

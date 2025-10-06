@@ -289,29 +289,32 @@ extern const char *expected_action;
 extern char actual_action;
 static cJSON *g_cycles = NULL;
 static int    g_cycle_count = 0;
-int    g_cycle_index = 0;
+int           g_cycle_index = 0;
 static int    g_mismatch_index = -1;
+static int    g_check_fail = 0;
 
 // Initialize per-test cycle state.
-static RESULT_CODES harte_begin(cJSON *aTest) {
+static RESULT_CODES harte_begin(MACHINE *m, cJSON *aTest) {
     g_cycles = cJSON_GetObjectItemCaseSensitive(aTest, "cycles");
     if (!cJSON_IsArray(g_cycles)) {
         return RESULT_PREP_ERROR;
     }
     g_cycle_count = cJSON_GetArraySize(g_cycles);
-    g_cycle_index = 0;
+    m->cpu.cycles = g_cycle_index = 0;
     g_mismatch_index = -1;
+    g_check_fail = 0;
     return RESULT_SUCCESS;
 }
 
-RESULT_CODES harte_check(void) {
+RESULT_CODES harte_check(MACHINE *m) {
     if (!g_cycles) {
         return RESULT_PREP_ERROR;
     }
 
-    if (g_cycle_index > g_cycle_count) {
+    if (g_cycle_index != m->cpu.cycles || g_cycle_index > g_cycle_count) {
         // Extra bus activity
         g_mismatch_index = g_cycle_index;
+        g_check_fail = 1;
         return RESULT_FAIL;
     }
 
@@ -340,6 +343,7 @@ RESULT_CODES harte_check(void) {
         if (g_mismatch_index == -1) {
             g_mismatch_index = g_cycle_index;
         }
+        g_check_fail = 1;
         return RESULT_FAIL;
     }
 
@@ -348,13 +352,13 @@ RESULT_CODES harte_check(void) {
     return RESULT_SUCCESS;
 }
 
-static RESULT_CODES harte_end(void) {
+static RESULT_CODES harte_end(MACHINE *m) {
     if (!g_cycles) {
         return RESULT_PREP_ERROR;
     }
 
     if (g_cycle_index != -1) {
-        if (g_cycle_index != g_cycle_count) {
+        if (g_check_fail || g_cycle_index != m->cpu.cycles && g_cycle_index != g_cycle_count) {
             // Missing bus activity (opcode under-ran)
             if (g_mismatch_index == -1) {
                 g_mismatch_index = g_cycle_index; // first missing index
@@ -391,7 +395,7 @@ int runTest(cJSON *aTest, int testNo, FAIL_STATE *failState) {
     }
 
     // Prepare Harte cycle checking
-    r = harte_begin(aTest);
+    r = harte_begin(&m, aTest);
     if (r != RESULT_SUCCESS) {
         return r;
     }
@@ -408,7 +412,7 @@ int runTest(cJSON *aTest, int testNo, FAIL_STATE *failState) {
     }
 
     // Ensure bus activity matched expected activity
-    r = harte_end();
+    r = harte_end(&m);
     if (r != RESULT_SUCCESS) {
         logToStr(CHAN_TEST_INFO, 0,
                  "Cycle mismatch at index %d (of %d). Exp: [%0.0f, %0.0f, %c] Got: [%0.0f, %0.0f, %c]\n",

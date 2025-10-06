@@ -3,7 +3,7 @@
 #include <assert.h>
 
 #ifdef DO_VALIDATE
-#define CYCLE(m)     do { harte_check(); m->cpu.cycles++; } while(0)
+#define CYCLE(m)     do { harte_check(m); m->cpu.cycles++; } while(0)
 #else
 #define CYCLE(m)     m->cpu.cycles++
 #endif
@@ -217,7 +217,7 @@ static inline void aix(MACHINE *m) {
     }
 }
 
-static inline void aixr(MACHINE *m) {
+static inline void aipxr(MACHINE *m) {
     a(m);
     uint8_t lo = m->cpu.address_lo;
     m->cpu.address_lo += m->cpu.X;
@@ -233,7 +233,7 @@ static inline void aixr(MACHINE *m) {
 }
 
 static inline void aipxrw(MACHINE *m) {
-    aixr(m);
+    aipxr(m);
     sl_read_a16(m);
     sl_write_a16(m);
 }
@@ -331,8 +331,7 @@ static inline void mixrw(MACHINE *m) {
 }
 
 static inline void unimplemented(MACHINE *m) {
-    extern int    g_cycle_index;
-    g_cycle_index = -1;
+    m->cpu.cycles = -1;
 }
 
 // Instructions
