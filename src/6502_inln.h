@@ -141,6 +141,11 @@ static inline void branch(MACHINE *m) {
     m->cpu.pc += (int8_t)m->cpu.scratch_lo;
 }
 
+static inline void brk_pc(MACHINE *m) {
+    m->cpu.pc = 0xFFFE;
+    al_read_pc(m);
+}
+
 static inline void p_from_stack(MACHINE *m) {
     m->cpu.flags = (pull(m) & ~0b00010000) | 0b00100000;
     CYCLE(m);
@@ -190,14 +195,18 @@ static inline void a(MACHINE *m) {
 }
 
 static inline void ar(MACHINE *m) {
-    al_read_pc(m);
-    ah_read_pc(m);
+    a(m);
+    sl_read_a16(m);
+}
+
+static inline void arr(MACHINE *m) {
+    a(m);
+    sl_read_a16(m);
     sl_read_a16(m);
 }
 
 static inline void arw(MACHINE *m) {
-    al_read_pc(m);
-    ah_read_pc(m);
+    a(m);
     sl_read_a16(m);
     sl_write_a16(m);
 }
@@ -230,6 +239,18 @@ static inline void aipxr(MACHINE *m) {
     if(m->cpu.address_lo < lo) {
         m->cpu.address_hi++;
     }
+}
+
+static inline void aixrr(MACHINE *m) {
+    aix(m);
+    sl_read_a16(m);
+    sl_read_a16(m);
+}
+
+static inline void aipxrr(MACHINE *m) {
+    aipxr(m);
+    sl_read_a16(m);
+    sl_read_a16(m);
 }
 
 static inline void aipxrw(MACHINE *m) {
@@ -279,6 +300,18 @@ static inline void mixa(MACHINE *m) {
     ah_read_a16_sl2al(m);
 }
 
+static inline void mixrr(MACHINE *m) {
+    mix(m);
+    sl_read_a16(m);
+    sl_read_a16(m);
+}
+
+static inline void mixrw(MACHINE *m) {
+    mix(m);
+    sl_read_a16(m);
+    sl_write_a16(m);
+}
+
 static inline void miy(MACHINE *m) {
     al_read_pc(m);
     sl_read_a16(m);
@@ -313,9 +346,21 @@ static inline void miyr(MACHINE *m) {
     }
 }
 
+static inline void miz(MACHINE *m) {
+    al_read_pc(m);
+    sl_read_a16(m);
+    ah_read_a16_sl2al(m);
+}
+
 static inline void mizy(MACHINE *m) {
     al_read_pc(m);
     read_a16_ind_y(m);
+}
+
+static inline void mrr(MACHINE *m) {
+    al_read_pc(m);
+    sl_read_a16(m);
+    sl_read_a16(m);
 }
 
 static inline void mrw(MACHINE *m) {
@@ -324,10 +369,20 @@ static inline void mrw(MACHINE *m) {
     sl_write_a16(m);
 }
 
-static inline void mixrw(MACHINE *m) {
-    mix(m);
-    sl_read_a16(m);
-    sl_write_a16(m);
+static inline void nop_pc(MACHINE *m, int offset) {
+    read_from_memory(m, m->cpu.pc + offset);
+    CYCLE(m);
+}
+
+static inline void read_pc(MACHINE *m) {
+    read_from_memory(m, m->cpu.pc);
+    CYCLE(m);
+}
+
+static inline void sed_fix(MACHINE *m) {
+    read_from_memory(m, m->cpu.address_16);
+    set_register_to_value(m, &m->cpu.A, m->cpu.A);
+    CYCLE(m);
 }
 
 static inline void unimplemented(MACHINE *m) {
@@ -339,6 +394,9 @@ static inline void adc_a16(MACHINE *m) {
     m->cpu.scratch_lo = read_from_memory(m, m->cpu.address_16);
     add_value_to_accumulator(m, m->cpu.scratch_lo);
     CYCLE(m);
+    if(m->cpu.class == CPU_65c02 && m->cpu.D) {
+        sed_fix(m);
+    }
 }
 
 static inline void adc_imm(MACHINE *m) {
@@ -346,6 +404,12 @@ static inline void adc_imm(MACHINE *m) {
     add_value_to_accumulator(m, m->cpu.scratch_lo);
     m->cpu.pc++;
     CYCLE(m);
+    if(m->cpu.class == CPU_65c02) {
+        if(m->cpu.D) {
+            sed_fix(m);
+            m->cpu.address_16 = 0x56;
+        }
+    }
 }
 
 static inline void and_a16(MACHINE *m) {
@@ -410,6 +474,16 @@ static inline void bit_a16(MACHINE *m) {
     CYCLE(m);
 }
 
+static inline void bit_imm(MACHINE *m) {
+    m->cpu.scratch_lo = read_from_memory(m, m->cpu.pc);
+    // set_register_to_value(m, &m->cpu.scratch_hi, m->cpu.A & m->cpu.scratch_lo);
+    CYCLE(m);
+    m->cpu.Z = (m->cpu.A & m->cpu.scratch_lo) == 0 ? -1 : 0;
+    // m->cpu.flags &= 0b00111111;
+    // m->cpu.flags |= (m->cpu.scratch_lo & 0b11000000);
+    m->cpu.pc++;
+}
+
 static inline void bmi(MACHINE *m) {
     m->cpu.scratch_lo = read_from_memory(m, m->cpu.pc);
     CYCLE(m);
@@ -437,6 +511,13 @@ static inline void bpl(MACHINE *m) {
     }
 }
 
+static inline void bra(MACHINE *m) {
+    m->cpu.scratch_lo = read_from_memory(m, m->cpu.pc);
+    CYCLE(m);
+    m->cpu.address_16 = ++m->cpu.pc;
+    branch(m);
+}
+
 static inline void bvc(MACHINE *m) {
     m->cpu.scratch_lo = read_from_memory(m, m->cpu.pc);
     CYCLE(m);
@@ -461,7 +542,17 @@ static inline void brk_6502(MACHINE *m) {
     m->cpu.pc = m->cpu.address_16;
     // Interrupt flag on at break
     m->cpu.flags |= 0b00000100;
-    CYCLE(m);
+}
+
+static inline void brk_65c02(MACHINE *m) {
+    ah_read_pc(m);
+    m->cpu.pc = m->cpu.address_16;
+    // BCD flag off at break
+    m->cpu.flags &= ~0b00001000;
+    if(m->cpu.flags & 0b00100000) {
+        // Interrupt flag on at break, if '-' flag is set
+        m->cpu.flags |= 0b00000100;
+    }
 }
 
 static inline void clc(MACHINE *m) {
@@ -527,6 +618,12 @@ static inline void cpy_imm(MACHINE *m) {
     CYCLE(m);
 }
 
+static inline void dea(MACHINE * m) {
+    read_from_memory(m, m->cpu.pc);
+    set_register_to_value(m, &m->cpu.A, m->cpu.A - 1);
+    CYCLE(m);
+}
+
 static inline void dec_a16(MACHINE *m) {
     set_register_to_value(m, &m->cpu.scratch_hi, m->cpu.scratch_lo - 1);
     write_to_memory(m, m->cpu.address_16, m->cpu.scratch_hi);
@@ -564,6 +661,12 @@ static inline void inc_a16(MACHINE *m) {
     CYCLE(m);
 }
 
+static inline void ina(MACHINE * m) {
+    read_from_memory(m, m->cpu.pc);
+    set_register_to_value(m, &m->cpu.A, m->cpu.A + 1);
+    CYCLE(m);
+}
+
 static inline void inx(MACHINE *m) {
     read_from_memory(m, m->cpu.pc);
     set_register_to_value(m, &m->cpu.X, m->cpu.X + 1);
@@ -578,19 +681,35 @@ static inline void iny(MACHINE *m) {
 
 static inline void jmp_a16(MACHINE *m) {
     m->cpu.pc = m->cpu.address_16;
-    CYCLE(m);
 }
 
 static inline void jmp_ind(MACHINE *m) {
-    ah_read_a16_sl2al(m);
-    m->cpu.pc = m->cpu.address_16;
+    m->cpu.address_lo++;
+    m->cpu.scratch_hi = read_from_memory(m, m->cpu.address_16);
     CYCLE(m);
+    if(!m->cpu.address_lo) {
+        m->cpu.address_hi++;
+    }
+    m->cpu.scratch_hi = read_from_memory(m, m->cpu.address_16);
+    CYCLE(m);
+    m->cpu.pc = m->cpu.scratch_16;
+}
+
+static inline void jmp_ind_x(MACHINE *m) {
+    a(m);
+    read_from_memory(m, m->cpu.pc - 2);
+    m->cpu.address_16 += m->cpu.X;
+    CYCLE(m);
+    sl_read_a16(m);
+    m->cpu.address_16++;
+    m->cpu.scratch_hi = read_from_memory(m, m->cpu.address_16);
+    CYCLE(m);
+    m->cpu.pc = m->cpu.scratch_16;
 }
 
 static inline void jsr_a16(MACHINE *m) {
     ah_read_pc(m);
     m->cpu.pc = m->cpu.address_16;
-    CYCLE(m);
 }
 
 static inline void lda_a16(MACHINE *m) {
@@ -659,6 +778,16 @@ static inline void ora_imm(MACHINE *m) {
     CYCLE(m);
 }
 
+static inline void phx(MACHINE *m) {
+    push(m, m->cpu.X);
+    CYCLE(m);
+}
+
+static inline void phy(MACHINE *m) {
+    push(m, m->cpu.Y);
+    CYCLE(m);
+}
+
 static inline void pla(MACHINE *m) {
     set_register_to_value(m, &m->cpu.A, pull(m));
     CYCLE(m);
@@ -666,6 +795,16 @@ static inline void pla(MACHINE *m) {
 
 static inline void plp(MACHINE *m) {
     m->cpu.flags = (pull(m) & ~0b00010000) | 0b00100000;            // Break flag off, but - flag on
+    CYCLE(m);
+}
+
+static inline void plx(MACHINE *m) {
+    set_register_to_value(m, &m->cpu.X, pull(m));
+    CYCLE(m);
+}
+
+static inline void ply(MACHINE *m) {
+    set_register_to_value(m, &m->cpu.Y, pull(m));
     CYCLE(m);
 }
 
@@ -680,17 +819,11 @@ static inline void php(MACHINE *m) {
     CYCLE(m);
 }
 
-static inline void read_pc(MACHINE *m) {
-    read_from_memory(m, m->cpu.pc);
-    CYCLE(m);
-}
-
 static inline void rol_a(MACHINE *m) {
     uint8_t c = m->cpu.A & 0x80;
     read_pc(m);
     set_register_to_value(m, &m->cpu.A, (m->cpu.A << 1) | m->cpu.C);
     m->cpu.C = c ? 1 : 0;
-    CYCLE(m);
 }
 
 static inline void rol_a16(MACHINE *m) {
@@ -706,7 +839,6 @@ static inline void ror_a(MACHINE *m) {
     read_pc(m);
     set_register_to_value(m, &m->cpu.A, (m->cpu.A >> 1) | (m->cpu.C << 7));
     m->cpu.C = c;
-    CYCLE(m);
 }
 
 static inline void ror_a16(MACHINE *m) {
@@ -720,19 +852,20 @@ static inline void ror_a16(MACHINE *m) {
 static inline void rti(MACHINE *m) {
     ah_from_stack(m);
     m->cpu.pc = m->cpu.address_16;
-    CYCLE(m);
 }
 
 static inline void rts(MACHINE *m) {
     m->cpu.pc = m->cpu.address_16;
     al_read_pc(m);
-    CYCLE(m);
 }
 
 static inline void sbc_a16(MACHINE *m) {
     m->cpu.scratch_lo = read_from_memory(m, m->cpu.address_16);
     subtract_value_from_accumulator(m, m->cpu.scratch_lo);
     CYCLE(m);
+    if(m->cpu.class == CPU_65c02 && m->cpu.D) {
+        sed_fix(m);
+    }
 }
 
 static inline void sbc_imm(MACHINE *m) {
@@ -740,24 +873,24 @@ static inline void sbc_imm(MACHINE *m) {
     subtract_value_from_accumulator(m, m->cpu.scratch_lo);
     m->cpu.pc++;
     CYCLE(m);
+    if(m->cpu.class == CPU_65c02 && m->cpu.D) {
+        sed_fix(m);
+    }
 }
 
 static inline void sec(MACHINE *m) {
     read_pc(m);
     m->cpu.C = 1;
-    CYCLE(m);
 }
 
 static inline void sed(MACHINE *m) {
     read_pc(m);
     m->cpu.D = 1;
-    CYCLE(m);
 }
 
 static inline void sei(MACHINE *m) {
     read_pc(m);
     m->cpu.I = 1;
-    CYCLE(m);
 }
 
 static inline void sta_a16(MACHINE *m) {
@@ -775,38 +908,51 @@ static inline void sty_a16(MACHINE *m) {
     CYCLE(m);
 }
 
+static inline void stz_a16(MACHINE *m, uint8_t value) {
+    write_to_memory(m, m->cpu.address_16, value);
+    CYCLE(m);
+}
+
 static inline void tax(MACHINE *m) {
     read_pc(m);
     set_register_to_value(m, &m->cpu.X, m->cpu.A);
-    CYCLE(m);
 }
 
 static inline void tay(MACHINE *m) {
     read_pc(m);
     set_register_to_value(m, &m->cpu.Y, m->cpu.A);
+}
+
+static inline void trb(MACHINE *m) {
+    m->cpu.Z = (m->cpu.A & m->cpu.scratch_lo) == 0;
+    m->cpu.scratch_lo = (m->cpu.A ^ 0xff) & m->cpu.scratch_lo;
+    write_to_memory(m, m->cpu.address_16, m->cpu.scratch_lo);
+    CYCLE(m);
+}
+
+static inline void tsb(MACHINE *m) {
+    m->cpu.Z = (m->cpu.A & m->cpu.scratch_lo) == 0;
+    m->cpu.scratch_lo |= m->cpu.A;
+    write_to_memory(m, m->cpu.address_16, m->cpu.scratch_lo);
     CYCLE(m);
 }
 
 static inline void tsx(MACHINE *m) {
     read_pc(m);
     set_register_to_value(m, &m->cpu.X, m->cpu.sp - 0x100);
-    CYCLE(m);
 }
 
 static inline void txa(MACHINE *m) {
     read_pc(m);
     set_register_to_value(m, &m->cpu.A, m->cpu.X);
-    CYCLE(m);
 }
 
 static inline void txs(MACHINE *m) {
     read_pc(m);
     m->cpu.sp = 0x100 + m->cpu.X;
-    CYCLE(m);
 }
 
 static inline void tya(MACHINE *m) {
     read_pc(m);
     set_register_to_value(m, &m->cpu.A, m->cpu.Y);
-    CYCLE(m);
 }

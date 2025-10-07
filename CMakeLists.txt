@@ -23,7 +23,6 @@ endif()
 add_executable(${PROJECT_NAME}
     src/6502_core.c
     src/6502.c
-    src/65c02.c
     src/cJSON.c
     src/harte.c
     src/log.c

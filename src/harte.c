@@ -335,20 +335,21 @@ RESULT_CODES harte_check(MACHINE *m) {
     expected_value   = exp_val;
     expected_action  = exp_action_str;
 
+    // Advance to next cycle
+    g_cycle_index++;
+
     // Compare
     const char exp_action_ch = exp_action_str[0]; // 'r' or 'w' from "read"/"write"
     if ((actual_address != (uint16_t)exp_addr) ||
             (actual_value   != (uint8_t)exp_val)   ||
             (actual_action  != exp_action_ch)) {
         if (g_mismatch_index == -1) {
-            g_mismatch_index = g_cycle_index;
+            g_mismatch_index = g_cycle_index - 1;
         }
         g_check_fail = 1;
         return RESULT_FAIL;
     }
 
-    // Advance to next cycle
-    g_cycle_index++;
     return RESULT_SUCCESS;
 }
 
@@ -358,8 +359,9 @@ static RESULT_CODES harte_end(MACHINE *m) {
     }
 
     if (g_cycle_index != -1) {
-        if (g_check_fail || g_cycle_index != m->cpu.cycles && g_cycle_index != g_cycle_count) {
+        if (g_check_fail || g_cycle_index != m->cpu.cycles || g_cycle_index != g_cycle_count) {
             // Missing bus activity (opcode under-ran)
+            g_check_fail = 1;
             if (g_mismatch_index == -1) {
                 g_mismatch_index = g_cycle_index; // first missing index
             }
