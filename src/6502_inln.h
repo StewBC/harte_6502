@@ -54,6 +54,11 @@ static inline void add_value_to_accumulator(MACHINE *m, uint8_t value) {
             m->cpu.C = 1;
         }
         m->cpu.A = (m->cpu.scratch_hi << 4) | (m->cpu.scratch_lo & 0x0F);
+        if(m->cpu.class == CPU_65c02) {            
+            read_from_memory(m, m->cpu.address_16);
+            CYCLE(m);
+            set_register_to_value(m, &m->cpu.A, m->cpu.A);
+        }
     }
 }
 
@@ -79,23 +84,41 @@ static inline void push(MACHINE *m, uint8_t value) {
 
 static inline void subtract_value_from_accumulator(MACHINE *m, uint8_t value) {
     uint8_t a = m->cpu.A;
-    m->cpu.C = 1 - m->cpu.C;
+    m->cpu.C ^= 1;
     m->cpu.scratch_16 = a - value - m->cpu.C;
-    set_register_to_value(m, &m->cpu.A, m->cpu.scratch_lo);
-    m->cpu.V = ((a ^ value) & (a ^ m->cpu.A) & 0x80) != 0 ? 1 : 0;
-    if(m->cpu.D) {
-        uint8_t lo = (a & 0x0F) - (value & 0x0F) - m->cpu.C;
-        uint8_t hi = (a >> 4) - (value >> 4);
-        if (lo & 0x10) {
-            lo -= 6;
-            hi--;
+    
+    if(m->cpu.class == CPU_6502) {
+        set_register_to_value(m, &m->cpu.A, m->cpu.scratch_lo);
+        m->cpu.V = ((a ^ value) & (a ^ m->cpu.A) & 0x80) != 0 ? 1 : 0;
+        if(m->cpu.D) {
+            uint8_t lo = (a & 0x0F) - (value & 0x0F) - m->cpu.C;
+            uint8_t hi = (a >> 4) - (value >> 4);
+            if (lo & 0x10) {
+                lo -= 6;
+                hi--;
+            }
+            if (hi & 0xF0) {
+                hi -= 6;
+            }
+            m->cpu.A = (hi << 4) | (lo & 0x0F);
         }
-        if (hi & 0xF0) {
-            hi -= 6;
+        m->cpu.C = m->cpu.scratch_16 < 0x100 ? 1 : 0;
+    } else {
+        m->cpu.A = m->cpu.scratch_lo;
+        m->cpu.V = ((a ^ m->cpu.A) & (a ^ value) & 0x80) ? 1 : 0;
+        if(m->cpu.D) {
+            if ((a & 0x0F) < ((value & 0x0F) + m->cpu.C)) {
+                m->cpu.scratch_lo -= 0x06;
+            }
+            if (a < value + m->cpu.C) {
+                m->cpu.scratch_lo -= 0x60;
+            }
+            read_from_memory(m, m->cpu.address_16);
+            CYCLE(m);
         }
-        m->cpu.A = (hi << 4) | (lo & 0x0F);
+        m->cpu.C = m->cpu.scratch_hi ? 0 : 1;
+        set_register_to_value(m, &m->cpu.A, m->cpu.scratch_lo);
     }
-    m->cpu.C = m->cpu.scratch_16 < 0x100 ? 1 : 0;
 }
 
 // Stage Helpers
@@ -379,12 +402,6 @@ static inline void read_pc(MACHINE *m) {
     CYCLE(m);
 }
 
-static inline void sed_fix(MACHINE *m) {
-    read_from_memory(m, m->cpu.address_16);
-    set_register_to_value(m, &m->cpu.A, m->cpu.A);
-    CYCLE(m);
-}
-
 static inline void unimplemented(MACHINE *m) {
     m->cpu.cycles = -1;
 }
@@ -394,21 +411,15 @@ static inline void adc_a16(MACHINE *m) {
     m->cpu.scratch_lo = read_from_memory(m, m->cpu.address_16);
     add_value_to_accumulator(m, m->cpu.scratch_lo);
     CYCLE(m);
-    if(m->cpu.class == CPU_65c02 && m->cpu.D) {
-        sed_fix(m);
-    }
 }
 
 static inline void adc_imm(MACHINE *m) {
     m->cpu.scratch_lo = read_from_memory(m, m->cpu.pc);
-    add_value_to_accumulator(m, m->cpu.scratch_lo);
     m->cpu.pc++;
     CYCLE(m);
-    if(m->cpu.class == CPU_65c02) {
-        if(m->cpu.D) {
-            sed_fix(m);
-            m->cpu.address_16 = 0x56;
-        }
+    add_value_to_accumulator(m, m->cpu.scratch_lo);
+    if(m->cpu.class == CPU_65c02 && m->cpu.D) {
+        m->cpu.address_16 = 0x56;
     }
 }
 
@@ -476,11 +487,8 @@ static inline void bit_a16(MACHINE *m) {
 
 static inline void bit_imm(MACHINE *m) {
     m->cpu.scratch_lo = read_from_memory(m, m->cpu.pc);
-    // set_register_to_value(m, &m->cpu.scratch_hi, m->cpu.A & m->cpu.scratch_lo);
     CYCLE(m);
     m->cpu.Z = (m->cpu.A & m->cpu.scratch_lo) == 0 ? -1 : 0;
-    // m->cpu.flags &= 0b00111111;
-    // m->cpu.flags |= (m->cpu.scratch_lo & 0b11000000);
     m->cpu.pc++;
 }
 
@@ -687,11 +695,13 @@ static inline void jmp_ind(MACHINE *m) {
     m->cpu.address_lo++;
     m->cpu.scratch_hi = read_from_memory(m, m->cpu.address_16);
     CYCLE(m);
-    if(!m->cpu.address_lo) {
-        m->cpu.address_hi++;
+    if(m->cpu.class == CPU_65c02) {
+        if(!m->cpu.address_lo) {
+            m->cpu.address_hi++;
+        }
+        m->cpu.scratch_hi = read_from_memory(m, m->cpu.address_16);
+        CYCLE(m);
     }
-    m->cpu.scratch_hi = read_from_memory(m, m->cpu.address_16);
-    CYCLE(m);
     m->cpu.pc = m->cpu.scratch_16;
 }
 
@@ -861,21 +871,16 @@ static inline void rts(MACHINE *m) {
 
 static inline void sbc_a16(MACHINE *m) {
     m->cpu.scratch_lo = read_from_memory(m, m->cpu.address_16);
-    subtract_value_from_accumulator(m, m->cpu.scratch_lo);
     CYCLE(m);
-    if(m->cpu.class == CPU_65c02 && m->cpu.D) {
-        sed_fix(m);
-    }
+    subtract_value_from_accumulator(m, m->cpu.scratch_lo);
 }
 
 static inline void sbc_imm(MACHINE *m) {
     m->cpu.scratch_lo = read_from_memory(m, m->cpu.pc);
-    subtract_value_from_accumulator(m, m->cpu.scratch_lo);
     m->cpu.pc++;
     CYCLE(m);
-    if(m->cpu.class == CPU_65c02 && m->cpu.D) {
-        sed_fix(m);
-    }
+    subtract_value_from_accumulator(m, m->cpu.scratch_lo);
+
 }
 
 static inline void sec(MACHINE *m) {

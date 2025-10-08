@@ -313,6 +313,7 @@ int machine_run_opcode_6502(MACHINE *m) {
 
 typedef enum {
     TSB_zpg     = 0x04,
+    TSB_abs     = 0x0C,
     ORA_ind_zp  = 0x12,
     TRB_zpg     = 0x14,
     INA         = 0x1A,
@@ -357,7 +358,7 @@ int machine_run_opcode_65c02(MACHINE *m) {
         case ORA_imm:   { ora_imm(m); } break; // 09
         case ASL_A:     { asl_a(m); } break; // 0A
         case UND_0B:    { ; } break; // 0B
-        case UND_0C:    { a(m); sl_read_a16(m); sl_read_a16(m); tsb(m); } break; // 0C
+        case TSB_abs:   { a(m); sl_read_a16(m); sl_read_a16(m); tsb(m); } break; // 0C
         case ORA_abs:   { a(m); ora_a16(m); } break; // 0D
         case ASL_abs:   { arr(m); asl_a16(m); } break; // 0E
         case UND_0F:    { a(m); } break; // 0F

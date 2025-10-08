@@ -1,7 +1,7 @@
-# Harte Tests 6502 emulator  
-This project implements the documented opcodes for the 6502 processor.  At this stage, the undocumented opcodes are not implemented.  The implementation is cycle accurate.  Each `step` of the emulated computer advances the 6502 CPU by one opcode.  This is V2 of the core - V1 advanced by 1 cycle but I made this code use a case statement, with 1 opcode advanced, and all code inlined.  It is still cycle accurate, but it is much faster than the V1 core.  
+# Harte Tests 6502 (and 65c02) emulator  
+This project implements the documented opcodes for the 6502, and Synertek 65c02, processor.  At this stage, the undocumented opcodes are not implemented on the 6502.  The implementation is cycle accurate.  Each `step` of the emulated computer advances the 6502 CPU by one opcode.  This is V2 of the core - V1 advanced by 1 cycle but I made this code use a case statement, with 1 opcode advanced, and all code inlined.  It is still cycle accurate, but it is much faster than the V1 core.  
     
-The 6502 emulation is in the context of a machine with RAM, ROMS and IO Ports, but for this specific application, the machine is configured with 64K of RAM, no banking, no ROMS and all RAM considered an IO Port.  This is because IO port access calls a callback function and this is the easiet way to trap RAM access and values read/written from/to RAM, which is needed to run the tests.  
+The emulation is in the context of a machine with RAM, ROMS and IO Ports, but for this specific application, the machine is configured with 64K of RAM, no banking, no ROMS and all RAM considered an IO Port.  This is because IO port access calls a callback function and this is the easiet way to trap RAM access and values read/written from/to RAM, which is needed to run the tests.  
   
 # The files
 | Name | Description
@@ -80,9 +80,9 @@ Powershell:
 $url  = "https://raw.githubusercontent.com/SingleStepTests/65x02/main/synertek65c02/v1/$file"
 ```
   
-# 6502
+# How does this emulation fare?  
   
-## How does this emulation fare?  
+## 6502  
 ```
 harte_6502> .\build\6502.exe 65x02/6502/*.json
 ...
@@ -93,11 +93,15 @@ Failed : 1518
 Skipped: 1050000
 Percent: 99.94%
 ```
-All 1518 tests that it fails are in `adc`, in `BCD` mode, where my emulator differs only in terms of the `N` and sometimes also the `V` flag results.  I also think, but I didn't carefully verify, that the discrepancy between my results and the tests are when `adc` is not given valid `BCD` values'.  Furthermore, I have been told that the actual 6502 in the Apple II, for example, will also give results that differ, in that aspect, from the tests.  So, at this point, I am happy with the performance of my emulator.  I have yet to use it for something useful, and if I do and I find issues, I'll come and update this (at least the README ;)  
-  
-# 65c02 - Synertek
-* WIP  
-  
+All 1518 tests that it fails are in `adc`, in `BCD` mode, where my emulator differs only in terms of the `N` and sometimes also the `V` flag results.  I also think, but I didn't carefully verify, that the discrepancy between my results and the tests are when `adc` is not given valid `BCD` values'.  Furthermore, I have been told that the actual 6502 in the Apple II, for example, will also give results that differ, in that aspect, from the tests.  So, at this point, I am happy with the performance.
+
+## 65c02 - Synertek  
+The 65c02 emulation appears to do a bit worse, but it all has to do with the `V` flag in `BCD` and `adc`.
+```
+harte_6502> .\build\6502.exe - 65x02/65c02/*.json
+TEST ff: Ran: 2560000 Passed: 2554150 Failed:  5850 Skipped:     0 Percent:   99.77%
+```
+    
 # Why and what's next?  
 I did this just because I was curious and wanted to try making a 6502 emulator.  
 
