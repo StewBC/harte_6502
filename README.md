@@ -107,9 +107,9 @@ I did this just because I was curious and wanted to try making a 6502 emulator.
 
 Using the V1 core, I made a very small Apple II emulator that can run the Manic Miner I made for the Apple II.  I call it the Manic Miner Machine.  I used the V1 6502 code as-is.  The Speaker audio on the Manic Miner Machine emulator is horrible but otherwise it works great, so I can confirm this CPU emulation works well enough in a real application.  You can see more about that here: [Manic Miner Machine](https://github.com/StewBC/mminer-apple2/tree/master/src/mmm)  
   
-I then, using that same core, made a more proper Apple II+ emulator.  You can see more about that here: [a2m](https://github.com/StewBC/a2m)
+I then, using that same core, made a more proper Apple II+ emulator.  You can see more about that here: [a2m](https://github.com/StewBC/a2m).  I have upgraded a2m to the V2 inline core.
 
-Next I want to make the 65c02 inline core, and then put all of this into [a2m](https://github.com/StewBC/a2m) and extend the emulator to a full Apple //e emulator.   
+Next I would like to take the 65c02 inline core, and then put that also into [a2m](https://github.com/StewBC/a2m) and extend the emulator to a full Apple //e emulator.  That might be a while, though.   
   
 Feel free to contact me at swessels@email.com if you have thoughts or suggestions.  
 
