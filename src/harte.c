@@ -403,14 +403,8 @@ int runTest(cJSON *aTest, int testNo, FAIL_STATE *failState) {
     }
 
     // Run one opcode
-    if (m.cpu.class == CPU_6502) {
-        if(!machine_run_opcode_6502(&m)) {
-            return RESULT_FILTERED_OUT;
-        }
-    } else {
-        if(!machine_run_opcode_65c02(&m)) {
-            return RESULT_FILTERED_OUT;
-        }
+    if(!machine_run_opcode(&m)) {
+        return RESULT_FILTERED_OUT;
     }
 
     // Ensure bus activity matched expected activity

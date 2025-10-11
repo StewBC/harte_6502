@@ -222,16 +222,14 @@ static inline void ar(MACHINE *m) {
     sl_read_a16(m);
 }
 
-static inline void arr(MACHINE *m) {
-    a(m);
-    sl_read_a16(m);
-    sl_read_a16(m);
-}
-
 static inline void arw(MACHINE *m) {
     a(m);
     sl_read_a16(m);
-    sl_write_a16(m);
+    if(m->cpu.class == CPU_6502) {
+        sl_write_a16(m);
+    } else {
+        sl_read_a16(m);
+    }
 }
 
 static inline void aix(MACHINE *m) {
@@ -270,16 +268,14 @@ static inline void aixrr(MACHINE *m) {
     sl_read_a16(m);
 }
 
-static inline void aipxrr(MACHINE *m) {
-    aipxr(m);
-    sl_read_a16(m);
-    sl_read_a16(m);
-}
-
 static inline void aipxrw(MACHINE *m) {
     aipxr(m);
     sl_read_a16(m);
-    sl_write_a16(m);
+    if(m->cpu.class == CPU_6502) {
+        sl_write_a16(m);
+    } else {
+        sl_read_a16(m);
+    }
 }
 
 static inline void aiy(MACHINE *m) {
@@ -323,16 +319,14 @@ static inline void mixa(MACHINE *m) {
     ah_read_a16_sl2al(m);
 }
 
-static inline void mixrr(MACHINE *m) {
-    mix(m);
-    sl_read_a16(m);
-    sl_read_a16(m);
-}
-
 static inline void mixrw(MACHINE *m) {
     mix(m);
     sl_read_a16(m);
-    sl_write_a16(m);
+    if(m->cpu.class == CPU_6502) {
+        sl_write_a16(m);
+    } else {
+        sl_read_a16(m);
+    }
 }
 
 static inline void miy(MACHINE *m) {
@@ -380,20 +374,18 @@ static inline void mizy(MACHINE *m) {
     read_a16_ind_y(m);
 }
 
-static inline void mrr(MACHINE *m) {
-    al_read_pc(m);
-    sl_read_a16(m);
-    sl_read_a16(m);
-}
-
 static inline void mrw(MACHINE *m) {
     al_read_pc(m);
     sl_read_a16(m);
-    sl_write_a16(m);
+    if(m->cpu.class == CPU_6502) {
+        sl_write_a16(m);
+    } else {
+        sl_read_a16(m);
+    }
 }
 
-static inline void nop_pc(MACHINE *m, int offset) {
-    read_from_memory(m, m->cpu.pc + offset);
+static inline void read_pc_1(MACHINE *m) {
+    read_from_memory(m, m->cpu.pc - 1);
     CYCLE(m);
 }
 
@@ -404,6 +396,14 @@ static inline void read_pc(MACHINE *m) {
 
 static inline void unimplemented(MACHINE *m) {
     m->cpu.cycles = -1;
+}
+
+// Pipeline selectors
+static inline void aixr_sel(MACHINE *m) {
+    if (m->cpu.class == CPU_6502)
+        aipxrw(m);
+    else
+        aixrr(m);
 }
 
 // Instructions
@@ -544,22 +544,19 @@ static inline void bvs(MACHINE *m) {
     }
 }
 
-static inline void brk_6502(MACHINE *m) {
+static inline void brk(MACHINE *m) {
     m->cpu.pc = 0xFFFE;
     a(m);
     m->cpu.pc = m->cpu.address_16;
-    // Interrupt flag on at break
-    m->cpu.flags |= 0b00000100;
-}
-
-static inline void brk_65c02(MACHINE *m) {
-    ah_read_pc(m);
-    m->cpu.pc = m->cpu.address_16;
-    // BCD flag off at break
-    m->cpu.flags &= ~0b00001000;
-    if(m->cpu.flags & 0b00100000) {
-        // Interrupt flag on at break, if '-' flag is set
+    if(m->cpu.class == CPU_6502) {
+        // Interrupt flag on at break
         m->cpu.flags |= 0b00000100;
+    } else {
+        m->cpu.flags &= ~0b00001000;
+        if(m->cpu.flags & 0b00100000) {
+            // Interrupt flag on at break, if '-' flag is set
+            m->cpu.flags |= 0b00000100;
+        }
     }
 }
 

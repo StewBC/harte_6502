@@ -123,5 +123,4 @@ void    pages_map(PAGES *pages, uint32_t start_page, uint32_t num_pages, uint8_t
 void    cpu_init(CPU *cpu);
 
 // Step the machine a single CPU cycle
-int machine_run_opcode_6502(MACHINE *m);
-int machine_run_opcode_65c02(MACHINE *m);
+int machine_run_opcode(MACHINE *m);
