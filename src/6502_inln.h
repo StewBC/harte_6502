@@ -1,6 +1,7 @@
 #pragma once
 
 #include <assert.h>
+extern int harte_check(MACHINE *m);
 
 #ifdef DO_VALIDATE
 #define CYCLE(m)     do { harte_check(m); m->cpu.cycles++; } while(0)
@@ -544,7 +545,7 @@ static inline void bvs(MACHINE *m) {
     }
 }
 
-static inline void brk(MACHINE *m) {
+static inline void brk_a2(MACHINE *m) {
     m->cpu.pc = 0xFFFE;
     a(m);
     m->cpu.pc = m->cpu.address_16;

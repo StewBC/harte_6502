@@ -22,13 +22,12 @@
 #define SetBit(x)       (1<<(x))
 const char *flag_names = "CZIDB-VN";
 
-enum RESULT_CODES {
+enum {
     RESULT_PREP_ERROR,
     RESULT_SUCCESS,
     RESULT_FAIL,
     RESULT_FILTERED_OUT
 };
-typedef enum RESULT_CODES RESULT_CODES;
 
 // Verification and DEBUG
 enum FAIL_STATE {
@@ -294,7 +293,7 @@ static int    g_mismatch_index = -1;
 static int    g_check_fail = 0;
 
 // Initialize per-test cycle state.
-static RESULT_CODES harte_begin(MACHINE *m, cJSON *aTest) {
+static int harte_begin(MACHINE *m, cJSON *aTest) {
     g_cycles = cJSON_GetObjectItemCaseSensitive(aTest, "cycles");
     if (!cJSON_IsArray(g_cycles)) {
         return RESULT_PREP_ERROR;
@@ -306,7 +305,7 @@ static RESULT_CODES harte_begin(MACHINE *m, cJSON *aTest) {
     return RESULT_SUCCESS;
 }
 
-RESULT_CODES harte_check(MACHINE *m) {
+int harte_check(MACHINE *m) {
     if (!g_cycles) {
         return RESULT_PREP_ERROR;
     }
@@ -353,7 +352,7 @@ RESULT_CODES harte_check(MACHINE *m) {
     return RESULT_SUCCESS;
 }
 
-static RESULT_CODES harte_end(MACHINE *m) {
+static int harte_end(MACHINE *m) {
     if (!g_cycles) {
         return RESULT_PREP_ERROR;
     }
@@ -387,7 +386,7 @@ int runTest(cJSON *aTest, int testNo, FAIL_STATE *failState) {
         return RESULT_PREP_ERROR;
     }
 
-    RESULT_CODES r = setMachineState(&m, &initialState);
+    int r = setMachineState(&m, &initialState);
     if (r != RESULT_SUCCESS) {
         return r;
     }
@@ -578,7 +577,7 @@ int main(int argc, char **argv) {
                "Failed: %5d "\
                "Skipped: %5d "\
                "Percent: %7.2f%%\n",
-               findFileData.cFileName, testNumber, testsPassed, testsFailed, testsSkipped, (double)((testsPassed + testsSkipped) * 100) / (testsPassed + testsFailed + testsSkipped));
+               &argv[ergv+1][strrtok(argv[ergv+1])], testNumber, testsPassed, testsFailed, testsSkipped, (double)((testsPassed + testsSkipped) * 100) / (testsPassed + testsFailed + testsSkipped));
 #else
     logMessage(CHAN_TEST_INFO, "TEST RESULTS:\n"\
                "Ran    : %d\n"\

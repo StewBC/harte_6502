@@ -77,13 +77,13 @@ int machine_run_opcode(MACHINE *m) {
     uint8_t opcode = read_from_memory(m, m->cpu.pc);
     // This is needed as I haven't implemented undefined 6502 opcodes- the implementation
     // below is for 65c02 unimplemented and new opcodes
-    if(undefined_6502[opcode]) {
+    if(m->cpu.class == CPU_6502 && undefined_6502[opcode]) {
         return 0;
     }
     CYCLE(m);
     m->cpu.pc++;
     switch(opcode) {
-        case BRK:       { al_read_pc(m); pc_hi_to_stack(m); pc_lo_to_stack(m); php(m); brk(m); } break; // 00
+        case BRK:       { al_read_pc(m); pc_hi_to_stack(m); pc_lo_to_stack(m); php(m); brk_a2(m); } break; // 00
         case ORA_X_ind: { mixa(m); ora_a16(m); } break; // 01
         case UND_02:    { al_read_pc(m); } break; // 02
         case UND_03:    { ; } break; // 03

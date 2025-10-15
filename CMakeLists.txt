@@ -20,6 +20,10 @@ if(DO_VALIDATE)
   add_compile_options(-DDO_VALIDATE=1)
 endif()
 
+if(APPLE)
+    add_compile_options(-fno-common)
+endif()
+
 add_executable(${PROJECT_NAME}
     src/6502_core.c
     src/6502.c
